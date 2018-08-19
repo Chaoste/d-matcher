@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import pandas as pd
 import numpy as np
@@ -12,7 +12,7 @@ METRICS = ('Gender', 'Discipline', 'Nationality', 'Collision')
 SEMESTER = ('WT-15', 'ST-16', 'WT-16', 'ST-17')
 
 Students = pd.DataFrame
-PreviousTeaming = Optional[pd.DataFrame, Tuple[pd.DataFrame]]
+PreviousTeaming = Optional[Union[pd.DataFrame, Tuple[pd.DataFrame]]]
 Teaming = pd.DataFrame
 TeamingResult = Tuple[pd.DataFrame, np.ndarray]
 

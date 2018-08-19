@@ -1,6 +1,7 @@
 import metrics
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 def arbitrary_teaming(students, semester):
     groups = []
@@ -49,7 +50,6 @@ def check_domination(P, new_x):
     # print('Removing {} out of {} elements'.format(sum(relation == - 1), len(P)))
     P = list(np.array(P)[relation > -1])
     if all(relation < 1) and not found_equal:
-        print('+', end='')
         # print('Adding dominating element')
         # No element dominates new_x
         P.append(new_x)
@@ -68,15 +68,20 @@ def semo(students, semester, debug=False, init_P=None, epochs=5,
         P = [generate_random_solution(students, previous_teaming, precision)]
     else:
         P = init_P
-    for i in range(epochs):
+    progressbar = tqdm(range(epochs))
+    for i in progressbar:
         x = P[np.random.choice(range(len(P)), 1)[0]]
         # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #1')
         x2 = mutate(x[0], mutation_intensity, previous_teaming, precision)
         # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #2')
         P = check_domination(P, x2)
         if i % np.ceil(epochs / 10) == 0:
-            print('.', end='')
+            scores = metrics.sem_multi_objective(x2[0])
+            score_str = ' | '.join([f'{x:.2f}' for x in scores])
+            progressbar.set_description(f"Errors: {score_str} => {scores.mean():.3f}")
+            progressbar.refresh()  # to show immediately the update
             # metric_values = metrics.sem_multi_objective(x2[0], previous_teaming)
+
     best = best_element(P)
     print('\nBest solution out of {} elements:'.format(len(P)))
     metrics.print_metric(best[1], 'semester {}'.format(semester))
