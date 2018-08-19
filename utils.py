@@ -1,14 +1,13 @@
 import pandas as pd
-import numpy as np
 import itertools as it
 import metrics
 import csv
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
-#------------------------------------------------------------------------------#
+# --------------------------------------------------------------------------- #
 # Helper
-#------------------------------------------------------------------------------#
+# --------------------------------------------------------------------------- #
+
 
 def process_semesters(students, target_func, *args, **kwargs):
     result = []  # pd.DataFrame(columns=['hash', 'Team', 'Semester', 'Sex', 'Discipline', 'Nationality'])
@@ -20,15 +19,16 @@ def process_semesters(students, target_func, *args, **kwargs):
         result.append(partial_result)
     return pd.DataFrame(pd.concat(result).copy(), index=range(321))
 
+
 def store_teaming(teaming, filename=None):
     # Use the same format as used for the input data
     return teaming.to_csv(filename, quoting=csv.QUOTE_ALL, index=False,
                           columns=['hash', 'Team', 'Semester'])
 
 
-#------------------------------------------------------------------------------#
+# --------------------------------------------------------------------------- #
 # Visualization
-#------------------------------------------------------------------------------#
+# --------------------------------------------------------------------------- #
 
 def plot_pareto_front_3d(P, filename=None):
     fig = plt.figure()
