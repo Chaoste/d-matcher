@@ -20,11 +20,12 @@ def process_semesters(students, target_func, *args, **kwargs):
     return pd.DataFrame(pd.concat(result).copy(), index=range(321))
 
 
-def store_teaming(teaming, filename=None):
+def store_teaming(teaming, filename=None, show_all=True):
     # Use the same format as used for the input data
     # Generates FutureWarning: Passing list-likes to .loc or [] with missing label
     return teaming.to_csv(filename, quoting=csv.QUOTE_ALL, index=False,
-                          columns=['hash', 'Team', 'Semester'])
+                          columns=None if show_all else ['hash', 'Team'],
+                          sep=';')
 
 
 # --------------------------------------------------------------------------- #

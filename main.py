@@ -37,7 +37,7 @@ def store_output(teaming: Teaming, path: str):
     _, filename = os.path.split(path)
     filename, ext = os.path.splitext(filename)
     timestamp = strftime("%Y_%m_%d_%H_%M_%S", gmtime())
-    output_path = os.path.join('output', f'teamings_{timestamp}.{ext}')
+    output_path = os.path.join('output', f'teamings_{timestamp}{ext}')
     utils.store_teaming(teaming, output_path)
     print('Saved results to {}.'.format(output_path))
 
