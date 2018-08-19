@@ -19,34 +19,31 @@ TeamingResult = Tuple[pd.DataFrame, np.ndarray]
 
 # Input file should be a csv file
 def read_input(path: str) -> pd.DataFrame:
-    students = pd.read_csv(path)
-    return students
+    students = pd.read_csv(os.path.join('input', path))
+    return students[['hash', 'Sex', 'Discipline', 'Nationality']]
 
 
 def find_teaming(students: pd.DataFrame,
                  previous_teaming: PreviousTeaming = None) -> TeamingResult:
-    teaming = utils.process_semesters(
-        students, algo.semo, epochs=6000,
-        previous_teaming=previous_teaming, mutation_intensity=20,
-        precision=4
-    )
-    metric_values = metrics.overall_multi_objective(teaming)
-    metrics.print_metric(metric_values, 'Teaming')
-    return (teaming, metric_values)
+    teaming = algo.semo(
+        students, epochs=6000, precision=4,
+        previous_teaming=previous_teaming, mutation_intensity=20) \
+        .reset_index()
+    return teaming
 
 
 def store_output(teaming: Teaming, path: str):
-    dir, filename = os.path.split(path)
-    output_path = os.path.join(dir, 'output_{}'.format(filename))
+    _, filename = os.path.split(path)
+    output_path = os.path.join('output', 'teamings_{}'.format(filename))
     utils.store_teaming(teaming, output_path)
     print('Saved results to {}.'.format(output_path))
 
 
 def execute(path: str):
     students = read_input(path)
-    teaming, metric_values = find_teaming(students)
+    teaming = find_teaming(students)
     store_output(teaming, path)
 
 
 if __name__ == '__main__':
-    execute('input/students.csv')
+    execute('students_wt_15.csv')

@@ -3,15 +3,15 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-def arbitrary_teaming(students, semester):
+def arbitrary_teaming(students):
     groups = []
     for i in range(15):
         team = students[i*5:(i+1)*5]
-        groups.extend((x['hash'], i+1, x['Semester'], x['Sex'], x['Discipline'], x['Nationality'])
+        groups.extend((x['hash'], i+1, x['Sex'], x['Discipline'], x['Nationality'])
                       for _, x in team.iterrows())
-    groups.extend((x['hash'], 16, x['Semester'], x['Sex'], x['Discipline'], x['Nationality'])
+    groups.extend((x['hash'], 16, x['Sex'], x['Discipline'], x['Nationality'])
                   for _, x  in students[75:].iterrows())
-    grouped = pd.DataFrame(groups, columns=['hash', 'Team', 'Semester', 'Sex', 'Discipline', 'Nationality'])
+    grouped = pd.DataFrame(groups, columns=['hash', 'Team', 'Sex', 'Discipline', 'Nationality'])
     return grouped
 
 def generate_random_solution(students, previous_teaming, precision):
@@ -60,7 +60,7 @@ def best_element(P):
     # Select the nearest element for zero
     return P[distances.argmin()]
 
-def semo(students, semester, debug=False, init_P=None, epochs=5,
+def semo(students, semester=None, debug=False, init_P=None, epochs=5,
          mutation_intensity=3, previous_teaming=None, precision=2):
     # Give the ability to run the function multiple times on the same collection
     # of Pareto elements. Each element consists of a tuple (solution, metrics)
@@ -70,21 +70,24 @@ def semo(students, semester, debug=False, init_P=None, epochs=5,
         P = init_P
     progressbar = tqdm(range(epochs))
     for i in progressbar:
-        x = P[np.random.choice(range(len(P)), 1)[0]]
-        # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #1')
-        x2 = mutate(x[0], mutation_intensity, previous_teaming, precision)
-        # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #2')
-        P = check_domination(P, x2)
-        if i % np.ceil(epochs / 10) == 0:
-            scores = metrics.sem_multi_objective(x2[0])
-            score_str = ' | '.join([f'{x:.2f}' for x in scores])
-            progressbar.set_description(f"Errors: {score_str} => {scores.mean():.3f}")
-            progressbar.refresh()  # to show immediately the update
-            # metric_values = metrics.sem_multi_objective(x2[0], previous_teaming)
-
+        try:
+            x = P[np.random.choice(range(len(P)), 1)[0]]
+            # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #1')
+            x2 = mutate(x[0], mutation_intensity, previous_teaming, precision)
+            # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #2')
+            P = check_domination(P, x2)
+            if i % 10 == 0:
+                scores = metrics.sem_multi_objective(x2[0])
+                score_str = ' | '.join([f'{x:.2f}' for x in scores])
+                progressbar.set_description(f"Errors: {score_str} => {scores.mean():.3f}")
+                progressbar.refresh()  # to show immediately the update
+                # metric_values = metrics.sem_multi_objective(x2[0], previous_teaming)
+        except KeyboardInterrupt:
+            print(f'User Interaction: Stopped earlier at epoch {i} !')
+            break
     best = best_element(P)
     print('\nBest solution out of {} elements:'.format(len(P)))
-    metrics.print_metric(best[1], 'semester {}'.format(semester))
+    metrics.print_metric(best[1], 'semester {semester}' if semester else 'given semester')
     if debug:
         return P
     return best[0]

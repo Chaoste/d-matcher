@@ -22,6 +22,7 @@ def process_semesters(students, target_func, *args, **kwargs):
 
 def store_teaming(teaming, filename=None):
     # Use the same format as used for the input data
+    # Generates FutureWarning: Passing list-likes to .loc or [] with missing label
     return teaming.to_csv(filename, quoting=csv.QUOTE_ALL, index=False,
                           columns=['hash', 'Team', 'Semester'])
 
