@@ -1,5 +1,7 @@
 # Custom:
-_project4
+_project4/
+output/
+input/
 
 
 # Byte-compiled / optimized / DLL files
