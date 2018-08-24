@@ -29,8 +29,11 @@ import kivy
 kivy.require('1.0.6')
 
 from kivy.app import App
+from kivy.uix.button import Button
+from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
+from kivy.uix.progressbar import ProgressBar
 from kivy.graphics import Color, Rectangle, Point, GraphicException
 from random import random
 from math import sqrt
@@ -50,6 +53,24 @@ def calculate_points(x1, y1, x2, y2, steps=5):
         lasty = y1 + dy * mi
         o.extend([lastx, lasty])
     return o
+
+
+class DropFile(Button):
+    def __init__(self, **kwargs):
+        super(DropFile, self).__init__(**kwargs)
+
+        # get app instance to add function from widget
+        app = App.get_running_app()
+
+        # add function to the list
+        app.drops.append(self.on_dropfile)
+
+    def on_dropfile(self, widget, filename):
+        # a function catching a dropped file
+        # if it's dropped in the widget's area
+        if self.collide_point(*Window.mouse_pos):
+            # on_dropfile's filename is bytes (py3)
+            self.text = filename.decode('utf-8')
 
 
 class Touchtracer(FloatLayout):
@@ -75,10 +96,14 @@ class Touchtracer(FloatLayout):
         ud['label'] = Label(size_hint=(None, None))
         self.update_touch_label(ud['label'], touch)
         self.add_widget(ud['label'])
+        self.progressbar = ProgressBar(max=100)
+        self.add_widget(self.progressbar)
+        self.progressbar.value = 1
         touch.grab(self)
         return True
 
     def on_touch_move(self, touch):
+        self.progressbar.value = (self.progressbar.value + 1) % 101
         if touch.grab_current is not self:
             return
         ud = touch.ud
@@ -132,6 +157,8 @@ class Touchtracer(FloatLayout):
         ud = touch.ud
         self.canvas.remove_group(ud['group'])
         self.remove_widget(ud['label'])
+        self.remove_widget(self.progressbar)
+        self.progressbar = None
 
     def update_touch_label(self, label, touch):
         label.text = 'ID: %s\nPos: (%d, %d)\nClass: %s' % (
@@ -146,7 +173,23 @@ class TouchtracerApp(App):
     icon = 'icon.png'
 
     def build(self):
+        # set an empty list that will be later populated
+        # with functions from widgets themselves
+        self.drops = []
+
+        # bind handling function to 'on_dropfile'
+        Window.bind(on_dropfile=self.handledrops)
+
         return Touchtracer()
+
+    def handledrops(self, *args):
+        # this will execute each function from list with arguments from
+        # Window.on_dropfile
+        #
+        # make sure `Window.on_dropfile` works on your system first,
+        # otherwise the example won't work at all
+        for func in self.drops:
+            func(*args)
 
     def on_pause(self):
         return True

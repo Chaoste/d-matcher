@@ -1,0 +1,47 @@
+#:kivy 1.0
+#:import kivy kivy
+
+<Touchtracer>:
+    canvas:
+        Color:
+            rgb: 1, 1, 1
+        Rectangle:
+            source: 'data/images/background.jpg'
+            size: self.size
+
+    GridLayout:
+        cols: 1
+        BoxLayout:
+            size_hint: 1, 2
+            padding: 0.25 * self.size[0], 0
+            orientation: 'vertical'
+            # canvas:
+            #     Color:
+            #         rgb: 0, 0, 1
+            #     Rectangle:
+            #         pos: self.pos
+            #         size: self.size
+            Label:
+                text: 'D-Matcher'
+                text_size: self.width, 200
+                font: 'Calibri Light'
+                font_size: 20
+                # size_hint: 1, .
+                halign: 'center'
+                valign: 'middle'
+            DropFile:
+                # size_hint: .5, 1
+                id: 'Drop Area'
+                text: 'Drop or select the input file'
+                height: '14dp'
+                background_normal: ''
+                background_color: 1, .3, .4, .85
+
+        BoxLayout:
+            size_hint: 1, 0.3
+
+        ProgressBar:
+            id: 'Progress Bar'
+            height: '5dp'
+            max: 100
+            value: 50
