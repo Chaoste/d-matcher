@@ -1,39 +1,18 @@
-'''
-Touch Tracer Line Drawing Demonstration
-=======================================
-
-This demonstrates tracking each touch registered to a device. You should
-see a basic background image. When you press and hold the mouse, you
-should see cross-hairs with the coordinates written next to them. As
-you drag, it leaves a trail. Additional information, like pressure,
-will be shown if they are in your device's touch.profile.
-
-.. note::
-
-   A function `calculate_points` handling the points which will be drawn
-   has by default implemented a delay of 5 steps. To get more precise visual
-   results lower the value of the optional keyword argument `steps`.
-
-This program specifies an icon, the file icon.png, in its App subclass.
-It also uses the particle.png file as the source for drawing the trails which
-are white on transparent. The file touchtracer.kv describes the application.
-
-The file android.txt is used to package the application for use with the
-Kivy Launcher Android application. For Android devices, you can
-copy/paste this directory into /sdcard/kivy/touchtracer on your Android device.
-
-'''
 __version__ = '1.0'
 
+import os
 import kivy
 kivy.require('1.0.6')
 
 from kivy.app import App
+from kivy.properties import DictProperty
 from kivy.uix.button import Button
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.progressbar import ProgressBar
+from kivy.uix.popup import Popup
+from kivy.properties import ObjectProperty
 from kivy.graphics import Color, Rectangle, Point, GraphicException
 from random import random
 from math import sqrt
@@ -70,107 +49,58 @@ class DropFile(Button):
         # if it's dropped in the widget's area
         if self.collide_point(*Window.mouse_pos):
             # on_dropfile's filename is bytes (py3)
-            self.text = filename.decode('utf-8')
+            app = App.get_running_app()
+            app.root.set_input_path(filename.decode('utf-8'))
+            # self.background_color = Color(0.4, 0.3, 1, 0.85, mode='rgba')
 
 
-class Touchtracer(FloatLayout):
-
-    def on_touch_down(self, touch):
-        win = self.get_parent_window()
-        ud = touch.ud
-        ud['group'] = g = str(touch.uid)
-        pointsize = 5
-        if 'pressure' in touch.profile:
-            ud['pressure'] = touch.pressure
-            pointsize = (touch.pressure * 100000) ** 2
-        ud['color'] = random()
-
-        with self.canvas:
-            Color(ud['color'], 1, 1, mode='hsv', group=g)
-            ud['lines'] = [
-                Rectangle(pos=(touch.x, 0), size=(1, win.height), group=g),
-                Rectangle(pos=(0, touch.y), size=(win.width, 1), group=g),
-                Point(points=(touch.x, touch.y), source='particle.png',
-                      pointsize=pointsize, group=g)]
-
-        ud['label'] = Label(size_hint=(None, None))
-        self.update_touch_label(ud['label'], touch)
-        self.add_widget(ud['label'])
-        self.progressbar = ProgressBar(max=100)
-        self.add_widget(self.progressbar)
-        self.progressbar.value = 1
-        touch.grab(self)
-        return True
-
-    def on_touch_move(self, touch):
-        self.progressbar.value = (self.progressbar.value + 1) % 101
-        if touch.grab_current is not self:
-            return
-        ud = touch.ud
-        ud['lines'][0].pos = touch.x, 0
-        ud['lines'][1].pos = 0, touch.y
-
-        index = -1
-
-        while True:
-            try:
-                points = ud['lines'][index].points
-                oldx, oldy = points[-2], points[-1]
-                break
-            except:
-                index -= 1
-
-        points = calculate_points(oldx, oldy, touch.x, touch.y)
-
-        # if pressure changed create a new point instruction
-        if 'pressure' in ud:
-            if not .95 < (touch.pressure / ud['pressure']) < 1.05:
-                g = ud['group']
-                pointsize = (touch.pressure * 100000) ** 2
-                with self.canvas:
-                    Color(ud['color'], 1, 1, mode='hsv', group=g)
-                    ud['lines'].append(
-                        Point(points=(), source='particle.png',
-                              pointsize=pointsize, group=g))
-
-        if points:
-            try:
-                lp = ud['lines'][-1].add_point
-                for idx in range(0, len(points), 2):
-                    lp(points[idx], points[idx + 1])
-            except GraphicException:
-                pass
-
-        ud['label'].pos = touch.pos
-        import time
-        t = int(time.time())
-        if t not in ud:
-            ud[t] = 1
-        else:
-            ud[t] += 1
-        self.update_touch_label(ud['label'], touch)
-
-    def on_touch_up(self, touch):
-        if touch.grab_current is not self:
-            return
-        touch.ungrab(self)
-        ud = touch.ud
-        self.canvas.remove_group(ud['group'])
-        self.remove_widget(ud['label'])
-        self.remove_widget(self.progressbar)
-        self.progressbar = None
-
-    def update_touch_label(self, label, touch):
-        label.text = 'ID: %s\nPos: (%d, %d)\nClass: %s' % (
-            touch.id, touch.x, touch.y, touch.__class__.__name__)
-        label.texture_update()
-        label.pos = touch.pos
-        label.size = label.texture_size[0] + 20, label.texture_size[1] + 20
+class LoadDialog(FloatLayout):
+    load = ObjectProperty(None)
+    cancel = ObjectProperty(None)
 
 
-class TouchtracerApp(App):
-    title = 'Touchtracer'
+class DMatcher(FloatLayout):
+    loadfile = ObjectProperty(None)
+    input_path = ObjectProperty(None)
+
+    # --- FileChooser logic -------------------------------------------------- #
+
+    def show_load(self):
+        content = LoadDialog(load=self.load, cancel=self.dismiss_popup)
+        self._popup = Popup(title="Load file", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
+
+    def load(self, path, filename):
+        self.set_input_path(os.path.join(path, filename[0]))
+        self.dismiss_popup()
+
+    def dismiss_popup(self):
+        self._popup.dismiss()
+
+    def set_input_path(self, path):
+        print(f'Selected {path} as input file.')
+
+        app = App.get_running_app()
+        app.root.ids.input_file_label.text = f'Selected File: {path}'
+        self.input_path = path
+
+    def execute_algorithm(self):
+        app = App.get_running_app()
+        app.root.ids.progress_bar.value = 0
+        # TODO:
+        app.root.ids.label_status.text = 'Success'
+        app.root.ids.progress_bar.value = 100
+
+
+
+class DMatcherApp(App):
+    widgets = DictProperty()
+    title = 'D-Matcher'
     icon = 'icon.png'
+
+    def __init__(self, **kwargs):
+        super(DMatcherApp, self).__init__(**kwargs)
 
     def build(self):
         # set an empty list that will be later populated
@@ -180,14 +110,11 @@ class TouchtracerApp(App):
         # bind handling function to 'on_dropfile'
         Window.bind(on_dropfile=self.handledrops)
 
-        return Touchtracer()
+        return DMatcher()
 
     def handledrops(self, *args):
         # this will execute each function from list with arguments from
-        # Window.on_dropfile
-        #
-        # make sure `Window.on_dropfile` works on your system first,
-        # otherwise the example won't work at all
+        # Window.on_dropfile (make sure `Window.on_dropfile` works on your system)
         for func in self.drops:
             func(*args)
 
@@ -196,4 +123,4 @@ class TouchtracerApp(App):
 
 
 if __name__ == '__main__':
-    TouchtracerApp().run()
+    DMatcherApp().run()

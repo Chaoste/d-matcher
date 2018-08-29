@@ -6,6 +6,9 @@ from kivy.uix.popup import Popup
 
 import os
 
+from pathlib import Path
+home = str(Path.home())
+
 
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
