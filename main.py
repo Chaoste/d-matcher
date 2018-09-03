@@ -16,47 +16,40 @@ from kivy.properties import ObjectProperty
 from kivy.graphics import Color, Rectangle, Point, GraphicException
 from random import random
 from math import sqrt
-
-
-def calculate_points(x1, y1, x2, y2, steps=5):
-    dx = x2 - x1
-    dy = y2 - y1
-    dist = sqrt(dx * dx + dy * dy)
-    if dist < steps:
-        return
-    o = []
-    m = dist / steps
-    for i in range(1, int(m)):
-        mi = i / m
-        lastx = x1 + dx * mi
-        lasty = y1 + dy * mi
-        o.extend([lastx, lasty])
-    return o
+from pathlib import Path
+home = str(Path.home())
 
 
 class DropFile(Button):
     def __init__(self, **kwargs):
         super(DropFile, self).__init__(**kwargs)
-
-        # get app instance to add function from widget
         app = App.get_running_app()
-
-        # add function to the list
         app.drops.append(self.on_dropfile)
 
     def on_dropfile(self, widget, filename):
-        # a function catching a dropped file
-        # if it's dropped in the widget's area
         if self.collide_point(*Window.mouse_pos):
             # on_dropfile's filename is bytes (py3)
             app = App.get_running_app()
             app.root.set_input_path(filename.decode('utf-8'))
-            # self.background_color = Color(0.4, 0.3, 1, 0.85, mode='rgba')
 
 
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
+
+
+class StatusLabel(Label):
+    def set_error(self, text):
+        self.color = [0.7, 0.4, 0.3, 1]
+        self.text = text
+
+    def set_warning(self, text):
+        self.color = [0.9, 0.6, 0, 1]
+        self.text = text
+
+    def set_success(self, text):
+        self.color = [0.3, 0.7, 0.3, 1]
+        self.text = text
 
 
 class DMatcher(FloatLayout):
@@ -79,10 +72,16 @@ class DMatcher(FloatLayout):
         self._popup.dismiss()
 
     def set_input_path(self, path):
-        print(f'Selected {path} as input file.')
-
         app = App.get_running_app()
+        print(f'Selected {path} as input file.')
+        _, filetype = os.path.splitext(path)
+        if filetype != '.csv':
+            app.root.ids.label_status.set_error(f'Received invalid file of type {filetype}!')
+            return
+
         app.root.ids.input_file_label.text = f'Selected File: {path}'
+        app.root.ids.drop_area.background_color = [0.1, 0.4, 0.1, 1]
+        app.root.ids.button_execute.disabled = False
         self.input_path = path
 
     def execute_algorithm(self):
@@ -90,6 +89,7 @@ class DMatcher(FloatLayout):
         app.root.ids.progress_bar.value = 0
         # TODO:
         app.root.ids.label_status.text = 'Success'
+        app.root.ids.label_status.set_success('Successfully created teaming files. They can be found in the same directory as the input file.')
         app.root.ids.progress_bar.value = 100
 
 
