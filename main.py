@@ -17,7 +17,7 @@ from kivy.graphics import Color, Rectangle, Point, GraphicException
 from random import random
 from math import sqrt
 
-import src.d_matcher as d_matcher
+# import src.d_matcher as d_matcher
 
 
 class DropFile(Button):
@@ -97,7 +97,7 @@ class DMatcher(FloatLayout):
         app = App.get_running_app()
         app.root.ids.progress_bar.value = 0
 
-        d_matcher.execute(self.input_path, Progressbar)
+        # d_matcher.execute(self.input_path, Progressbar)
 
         app.root.ids.label_status.text = 'Success'
         app.root.ids.label_status.set_success('Successfully created teaming files. They can be found in the same directory as the input file.')
@@ -140,11 +140,13 @@ class DMatcherApp(App):
 
     def __init__(self, **kwargs):
         super(DMatcherApp, self).__init__(**kwargs)
+        print('Hi')
 
     def build(self):
         # set an empty list that will be later populated
         # with functions from widgets themselves
         self.drops = []
+        print('Ho')
 
         # bind handling function to 'on_dropfile'
         Window.bind(on_dropfile=self.handledrops)

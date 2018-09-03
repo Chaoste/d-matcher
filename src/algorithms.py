@@ -1,7 +1,8 @@
-import metrics
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+
+import src.metrics as metrics
 
 def arbitrary_teaming(students):
     groups = []

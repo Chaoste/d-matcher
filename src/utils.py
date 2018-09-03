@@ -1,8 +1,9 @@
 import pandas as pd
 import itertools as it
-import metrics
 import csv
 from matplotlib import pyplot as plt
+
+import src.metrics as metrics
 
 # --------------------------------------------------------------------------- #
 # Helper

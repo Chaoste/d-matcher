@@ -5,8 +5,8 @@ from time import gmtime, strftime
 import pandas as pd
 import numpy as np
 
-import algorithms as algo
-import utils
+import src.algorithms as algo
+import src.utils as utils
 # import metrics
 
 METRICS = ('Gender', 'Discipline', 'Nationality', 'Collision')
