@@ -61,15 +61,15 @@ def best_element(P):
     return P[distances.argmin()]
 
 def semo(students, semester=None, debug=False, init_P=None, epochs=5,
-         mutation_intensity=3, previous_teaming=None, precision=2):
+         mutation_intensity=3, previous_teaming=None, precision=2, progressbar=None):
     # Give the ability to run the function multiple times on the same collection
     # of Pareto elements. Each element consists of a tuple (solution, metrics)
     if init_P is None:
         P = [generate_random_solution(students, previous_teaming, precision)]
     else:
         P = init_P
-    progressbar = tqdm(range(epochs))
-    for i in progressbar:
+    bar = (progressbar or tqdm)(range(epochs))
+    for i in bar:
         try:
             x = P[np.random.choice(range(len(P)), 1)[0]]
             # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #1')
@@ -79,8 +79,8 @@ def semo(students, semester=None, debug=False, init_P=None, epochs=5,
             if i % 10 == 0:
                 scores = metrics.sem_multi_objective(x2[0])
                 score_str = ' | '.join([f'{x:.2f}' for x in scores])
-                progressbar.set_description(f"Errors: {score_str} => {scores.mean():.3f}")
-                progressbar.refresh()  # to show immediately the update
+                bar.set_description(f"Errors: {score_str} => {scores.mean():.3f}")
+                bar.refresh()  # to show immediately the update
                 # metric_values = metrics.sem_multi_objective(x2[0], previous_teaming)
         except KeyboardInterrupt:
             print(f'User Interaction: Stopped earlier at epoch {i} !')

@@ -16,8 +16,8 @@ from kivy.properties import ObjectProperty
 from kivy.graphics import Color, Rectangle, Point, GraphicException
 from random import random
 from math import sqrt
-from pathlib import Path
-home = str(Path.home())
+
+import src.d_matcher as d_matcher
 
 
 class DropFile(Button):
@@ -96,11 +96,41 @@ class DMatcher(FloatLayout):
     def execute_algorithm(self):
         app = App.get_running_app()
         app.root.ids.progress_bar.value = 0
-        # TODO:
+
+        d_matcher.execute(self.input_path, Progressbar)
+
         app.root.ids.label_status.text = 'Success'
         app.root.ids.label_status.set_success('Successfully created teaming files. They can be found in the same directory as the input file.')
         app.root.ids.progress_bar.value = 100
 
+
+class Progressbar:
+    def __init__(self, _range):
+        self.app = App.get_running_app()
+        self._range = _range
+        self._gen = iter(_range)
+        # TODO: start progressbar
+
+    def __next__(self):
+        print('__next__')
+        try:
+            next_value = next(self._gen)
+            app.root.ids.progress_bar.value = round(100 * next_value / len(self._range))
+            return next_value
+        except StopIteration:
+            app.root.ids.progress_bar.value = 100
+            print('__end__')
+            raise StopIteration
+
+    def __iter__(self):
+        print('__iter__')
+        return self
+
+    def set_description(self, text):
+        print('set desc', text)
+
+    def refresh(self):
+        pass
 
 
 class DMatcherApp(App):

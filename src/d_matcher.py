@@ -25,10 +25,12 @@ def read_input(path: str) -> pd.DataFrame:
 
 
 def find_teaming(students: pd.DataFrame,
-                 previous_teaming: PreviousTeaming = None) -> TeamingResult:
+                 previous_teaming: PreviousTeaming = None,
+                 progressbar=None) -> TeamingResult:
     teaming = algo.semo(
         students, epochs=6000, precision=4,
-        previous_teaming=previous_teaming, mutation_intensity=20) \
+        previous_teaming=previous_teaming, mutation_intensity=20,
+        progressbar=progressbar) \
         .reset_index()
     return teaming
 
@@ -42,9 +44,9 @@ def store_output(teaming: Teaming, path: str):
     print('Saved results to {}.'.format(output_path))
 
 
-def execute(path: str):
+def execute(path: str, progressbar=None):
     students = read_input(path)
-    teaming = find_teaming(students)
+    teaming = find_teaming(students, progressbar)
     store_output(teaming, path)
 
 
