@@ -14,6 +14,7 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.uix.popup import Popup
 from kivy.properties import ObjectProperty
 from kivy.graphics import Color, Rectangle, Point, GraphicException
+from kivy.uix.filechooser import FileChooser
 from random import random
 from math import sqrt
 
@@ -23,6 +24,7 @@ from math import sqrt
 class DropFile(Button):
     def __init__(self, **kwargs):
         super(DropFile, self).__init__(**kwargs)
+        print('X')
         app = App.get_running_app()
         app.drops.append(self.on_dropfile)
 
@@ -60,9 +62,14 @@ class DMatcher(FloatLayout):
     loadfile = ObjectProperty(None)
     input_path = ObjectProperty(None)
 
+    def __init__(self, **kwargs):
+        super(DMatcher, self).__init__(**kwargs)
+        print('DMatcher init')
+
     # --- FileChooser logic -------------------------------------------------- #
 
     def show_load(self):
+        app = App.get_running_app()
         content = LoadDialog(load=self.load, cancel=self.dismiss_popup)
         self._popup = Popup(title="Load file", content=content,
                             size_hint=(0.9, 0.9))
@@ -77,7 +84,7 @@ class DMatcher(FloatLayout):
 
     def set_input_path(self, path):
         app = App.get_running_app()
-        print(f'Selected {path} as input file.')
+        print(f'Selected {path} as input file./')
         _, filetype = os.path.splitext(path)
         if filetype != '.csv':
             app.root.ids.label_status.set_error(f'Received invalid file of type {filetype}!')
