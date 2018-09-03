@@ -47,6 +47,10 @@ class StatusLabel(Label):
         self.color = [0.9, 0.6, 0, 1]
         self.text = text
 
+    def set_status(self, text):
+        self.color = [1, 1, 1, 1]
+        self.text = text
+
     def set_success(self, text):
         self.color = [0.3, 0.7, 0.3, 1]
         self.text = text
@@ -79,8 +83,13 @@ class DMatcher(FloatLayout):
             app.root.ids.label_status.set_error(f'Received invalid file of type {filetype}!')
             return
 
-        app.root.ids.input_file_label.text = f'Selected File: {path}'
+        app.root.ids.input_file_label.text = f'Selected File:\n{path}'
+        app.root.ids.label_status.set_status(f'Ready to processs selected file.')
+        # Set background to default behaviour (initial dark, hovered light)
+        app.root.ids.drop_area.background_normal = app.root.ids.button_execute.background_normal
         app.root.ids.drop_area.background_color = [0.1, 0.4, 0.1, 1]
+        app.root.ids.button_execute.background_normal = ''
+        app.root.ids.button_execute.background_color = [0.1, 0.4, 0.1, 1]
         app.root.ids.button_execute.disabled = False
         self.input_path = path
 

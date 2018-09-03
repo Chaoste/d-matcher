@@ -1,5 +1,6 @@
 #:kivy 1.0
 #:import kivy kivy
+#:import pathlib pathlib
 
 <DMatcher>:
     canvas:
@@ -12,63 +13,71 @@
     GridLayout:
         cols: 1
         BoxLayout:
-            size_hint: 1, 2
+            size_hint: 1, 10
             padding: 0.25 * self.size[0], 0
             orientation: 'vertical'
+
             Label:
                 text: 'D-Matcher'
                 text_size: self.width, 200
                 font: 'Calibri Light'
-                font_size: 20
+                font_size: 28
                 halign: 'center'
                 valign: 'middle'
+
+            BoxLayout:
+                size_hint: 1, 0.3
+
             DropFile:
                 id: drop_area
-                text: 'Drop or select the input file'
+                text: 'Drop or select the input file (.csv)'
                 height: '14dp'
                 background_normal: ''
                 background_color: .4, .3, .7, 1
                 on_release: root.show_load()
 
             BoxLayout:
-                size_hint: 1, 0.3
-
-            BoxLayout:
-                size_hint: 1, 0.5
+                size_hint: 1, 1
                 Label:
                     id: input_file_label
                     text: 'No File Selected'
                     text_size: self.width, 200
-                    # font: 'Calibri Light'
+                    font: 'Calibri Light'
                     font_size: 14
                     halign: 'center'
                     valign: 'middle'
+
+            BoxLayout:
+                size_hint: 1, 0.8
+                orientation: 'horizontal'
+                BoxLayout:
+                    size_hint: 0.2, 1
                 Button:
-                    # size_hint: 1, 2
-                    # height: '16pt'
+                    size_hint: 0.6, 1
                     id: button_execute
-                    disabled: True
                     text: 'Calculate Teams'
+                    disabled: True
                     on_release: root.execute_algorithm()
+                BoxLayout:
+                    size_hint: 0.2, 1
 
             StatusLabel:
                 id: label_status
                 text: ''
                 text_size: self.width, 200
-                # font: 'Calibri Light'
+                font: 'Calibri Light'
                 font_size: 18
                 color: 0.3, 0.7, 0.3, 1
                 halign: 'center'
                 valign: 'middle'
 
-        FileChooser:
-            id: fc
-
         ProgressBar:
             id: progress_bar
-            height: '5dp'
             max: 100
-            value: 50
+            value: 0
+
+        FileChooser:
+            id: fc
 
 
 <LoadDialog>:
@@ -78,7 +87,7 @@
         orientation: "vertical"
         FileChooserListView:
             id: filechooser
-            path: home
+            path: str(pathlib.Path.home())
 
         BoxLayout:
             size_hint_y: None
