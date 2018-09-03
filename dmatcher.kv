@@ -75,9 +75,10 @@
             id: progress_bar
             max: 100
             value: 0
+    
+    FileChooser:
+        id: fc
 
-        FileChooser:
-            id: fc
 
 
 <LoadDialog>:
@@ -87,7 +88,7 @@
         orientation: "vertical"
         FileChooserListView:
             id: filechooser
-            path: str(pathlib.Path.home())
+            # path: str(pathlib.Path.home())
 
         BoxLayout:
             size_hint_y: None
