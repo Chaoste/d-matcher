@@ -57,7 +57,7 @@
                     id: button_execute
                     text: 'Calculate Teams'
                     disabled: True
-                    on_release: root.execute_algorithm()
+                    on_release: root.async_execute_algorithm()
                 BoxLayout:
                     size_hint: 0.2, 1
 
@@ -71,6 +71,16 @@
                 halign: 'center'
                 valign: 'middle'
 
+            StatusLabel:
+                id: label_result
+                text: ''
+                text_size: self.width, 100
+                font: 'Calibri Light'
+                font_size: 14
+                color: 1, 1, 1, 1
+                halign: 'center'
+                valign: 'middle'
+
         ProgressBar:
             id: progress_bar
             max: 100
@@ -79,8 +89,6 @@
     FileChooser:
         id: fc
 
-
-
 <LoadDialog>:
     BoxLayout:
         size: root.size
@@ -88,7 +96,7 @@
         orientation: "vertical"
         FileChooserListView:
             id: filechooser
-            # path: str(pathlib.Path.home())
+            path: str(pathlib.Path.home())
 
         BoxLayout:
             size_hint_y: None

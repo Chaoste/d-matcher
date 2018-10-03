@@ -2,9 +2,12 @@ __version__ = '1.0'
 
 import os
 import kivy
+import time
+from concurrent.futures import ThreadPoolExecutor
 kivy.require('1.0.6')
 
 from kivy.app import App
+from kivy.clock import Clock
 from kivy.properties import DictProperty
 from kivy.uix.button import Button
 from kivy.core.window import Window
@@ -18,7 +21,7 @@ from kivy.uix.filechooser import FileChooser
 from random import random
 from math import sqrt
 
-# import src.d_matcher as d_matcher
+import src.d_matcher as d_matcher
 
 
 class DropFile(Button):
@@ -69,7 +72,6 @@ class DMatcher(FloatLayout):
     # --- FileChooser logic -------------------------------------------------- #
 
     def show_load(self):
-        app = App.get_running_app()
         content = LoadDialog(load=self.load, cancel=self.dismiss_popup)
         self._popup = Popup(title="Load file", content=content,
                             size_hint=(0.9, 0.9))
@@ -100,14 +102,18 @@ class DMatcher(FloatLayout):
         app.root.ids.button_execute.disabled = False
         self.input_path = path
 
+    def async_execute_algorithm(self):
+        executor = ThreadPoolExecutor(max_workers=1)
+        executor.submit(self.execute_algorithm)
+
     def execute_algorithm(self):
         app = App.get_running_app()
-        app.root.ids.progress_bar.value = 0
+        self.app.root.ids.label_result.text = ''
+        d_matcher.execute(self.input_path, epochs=100, progressbar=Progressbar)
+        app.root.ids.label_status.set_success(
+            'Successfully created teaming files. '
+            'They can be found in the same directory as the input file.')
 
-        # d_matcher.execute(self.input_path, Progressbar)
-
-        app.root.ids.label_status.text = 'Success'
-        app.root.ids.label_status.set_success('Successfully created teaming files. They can be found in the same directory as the input file.')
         app.root.ids.progress_bar.value = 100
 
 
@@ -119,24 +125,27 @@ class Progressbar:
         # TODO: start progressbar
 
     def __next__(self):
-        print('__next__')
         try:
             next_value = next(self._gen)
-            app.root.ids.progress_bar.value = round(100 * next_value / len(self._range))
+            new_progress_value = round(100 * next_value / len(self._range))
+            if self.app.root.ids.progress_bar.value != new_progress_value:
+                self.app.root.ids.progress_bar.value = new_progress_value
             return next_value
         except StopIteration:
-            app.root.ids.progress_bar.value = 100
-            print('__end__')
+            self.app.root.ids.progress_bar.value = 100
             raise StopIteration
 
     def __iter__(self):
-        print('__iter__')
         return self
 
     def set_description(self, text):
-        print('set desc', text)
+        self.app.root.ids.label_status.set_status(text)
+
+    def set_final_desc(self, text):
+        self.app.root.ids.label_result.text = text
 
     def refresh(self):
+        # We don't need to force refreshing since kivy will take care of it
         pass
 
 

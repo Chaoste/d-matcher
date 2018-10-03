@@ -26,9 +26,10 @@ def read_input(path: str) -> pd.DataFrame:
 
 def find_teaming(students: pd.DataFrame,
                  previous_teaming: PreviousTeaming = None,
+                 epochs: int = 6000,
                  progressbar=None) -> TeamingResult:
     teaming = algo.semo(
-        students, epochs=6000, precision=4,
+        students, epochs=epochs, precision=4,
         previous_teaming=previous_teaming, mutation_intensity=20,
         progressbar=progressbar) \
         .reset_index()
@@ -44,9 +45,10 @@ def store_output(teaming: Teaming, path: str):
     print('Saved results to {}.'.format(output_path))
 
 
-def execute(path: str, progressbar=None):
+def execute(path: str, epochs: int = 6000, progressbar=None):
+    print(f'Execute D-Matcher with {epochs} epochs for input file {path}')
     students = read_input(path)
-    teaming = find_teaming(students, progressbar)
+    teaming = find_teaming(students, epochs=epochs, progressbar=progressbar)
     store_output(teaming, path)
 
 

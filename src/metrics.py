@@ -90,6 +90,8 @@ def overall_multi_objective(teaming, previous_teaming=None):
     return np.mean(results, axis=0)
 
 def print_metric(metric_output, teaming_name):
-    print('Multi-objective metric for {}: '.format(teaming_name) +
-          'GenderBalance={:.2f}, Disciplines={:.2f}'.format(*metric_output[:2]) +
-          ', Nationalities={:.2f}, Collision={:.2f}'.format(*metric_output[2:]))
+    output = ('Multi-objective metric for {}: '.format(teaming_name) +
+              'GenderBalance={:.2f}, Disciplines={:.2f}'.format(*metric_output[:2]) +
+              ', Nationalities={:.2f}, Collision={:.2f}'.format(*metric_output[2:]))
+    print(output)
+    return output

@@ -32,3 +32,7 @@ For comparing results we defined metrics for each dimension which gives a rating
 
 The results of the algorithm between teaming2 and teaming3 get worse because we consider the fourth metric in the second one. With an additional submetric the problem become's more difficult and the search space greater. Therefore the algorithm takes longer to find a good local minimum regarding all four submetrics.
 For the fourth teaming the search space doesn't become greater but there are less good solution because of the aggravated metric
+
+### Release
+
+TODO: https://kivy.org/doc/stable/guide/packaging-osx.html

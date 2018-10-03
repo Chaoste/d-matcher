@@ -88,7 +88,9 @@ def semo(students, semester=None, debug=False, init_P=None, epochs=5,
             break
     best = best_element(P)
     print('\nBest solution out of {} elements:'.format(len(P)))
-    metrics.print_metric(best[1], 'semester {semester}' if semester else 'given semester')
+    output_metrics = metrics.print_metric(best[1], 'semester {semester}' if semester else 'given semester')
+    if hasattr(bar, 'set_final_desc'):
+        bar.set_final_desc(output_metrics)
     if debug:
         return P
     return best[0]

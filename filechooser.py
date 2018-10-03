@@ -6,6 +6,7 @@ from kivy.utils import platform
 
 class TestApp(App):
     def build(self):
+        print('X')
         if platform == 'win':
             user_path = dirname(expanduser('~')) + sep + 'Documents'
         else:
@@ -14,6 +15,7 @@ class TestApp(App):
                               favorites=[(user_path, 'Documents')])
         browser.bind(on_success=self._fbrowser_success,
                      on_canceled=self._fbrowser_canceled)
+        print('Y')
         return browser
     def _fbrowser_canceled(self, instance):
         print('cancelled, Close self.')
