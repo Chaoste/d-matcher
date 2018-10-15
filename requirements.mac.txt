@@ -3,7 +3,8 @@ chardet==3.0.4
 cycler==0.10.0
 docutils==0.14
 idna==2.7
-Kivy==1.10.1
+# Kivy==1.10.1
+git+https://github.com/matham/kivy.git@async-loop
 Kivy-Garden==0.1.4
 kiwisolver==1.0.1
 matplotlib==2.2.3

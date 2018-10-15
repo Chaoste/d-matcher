@@ -1,12 +1,17 @@
 __version__ = '1.0'
 
 import os
+import trio
+
+os.environ['KIVY_EVENTLOOP'] = 'trio'
+'''trio needs to be set so that it'll be used for the event loop. '''
+
 import kivy
 import time
 from concurrent.futures import ThreadPoolExecutor
 kivy.require('1.0.6')
 
-from kivy.app import App
+from kivy.app import App, async_runTouchApp
 from kivy.clock import Clock
 from kivy.properties import DictProperty
 from kivy.uix.button import Button
@@ -103,12 +108,13 @@ class DMatcher(FloatLayout):
         self.input_path = path
 
     def async_execute_algorithm(self):
-        executor = ThreadPoolExecutor(max_workers=1)
-        executor.submit(self.execute_algorithm)
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(self.execute_algorithm)
+            # print('Future result:', future.result())
 
     def execute_algorithm(self):
         app = App.get_running_app()
-        self.app.root.ids.label_result.text = ''
+        app.root.ids.label_result.text = 'Starting algorithm'
         d_matcher.execute(self.input_path, epochs=100, progressbar=Progressbar)
         app.root.ids.label_status.set_success(
             'Successfully created teaming files. '
@@ -122,7 +128,7 @@ class Progressbar:
         self.app = App.get_running_app()
         self._range = _range
         self._gen = iter(_range)
-        # TODO: start progressbar
+        self.app.root.ids.progress_bar.value = 0
 
     def __next__(self):
         try:
@@ -179,5 +185,65 @@ class DMatcherApp(App):
         return True
 
 
+
+async def run_app_happily(app, nursery):
+    '''This method, which runs Kivy, is run by trio as one of the coroutines.
+    '''
+    await async_runTouchApp(app)  # run Kivy
+    print('App done')
+    # now cancel all the other tasks that may be running
+    nursery.cancel_scope.cancel()
+
+def execute_algorithm():
+    app = App.get_running_app()
+    app.root.ids.label_result.text = 'Starting algorithm'
+    d_matcher.execute(app.root.input_path, epochs=100, progressbar=Progressbar)
+    app.root.ids.label_status.set_success(
+        'Successfully created teaming files. '
+        'They can be found in the same directory as the input file.')
+
+    app.root.ids.progress_bar.value = 100
+
+async def watch_button_closely(root):
+    '''This is run side by side with the app and it watches and reacts to the
+    button shown in kivy.'''
+    i = 0
+
+    # we watch for 7 button presses and then exit this task. if the app is
+    # closed before that, run_app_happily will cancel all the tasks, so we
+    # should catch it first and print it and then re-raise
+    try:
+
+        # watch the on_release event of the button and react to every release
+        async for _ in root.ids.btn.async_bind('on_release'):
+            execute_algorithm()
+            break
+
+        print('Goodbye :(')
+    except trio.Cancelled:
+        print('update_label1 canceled early')
+        raise  # we MUST re-raise this exception
+    finally:
+        print('Done with update_label1')
+
+
 if __name__ == '__main__':
-    DMatcherApp().run()
+    async def root_func():
+        '''trio needs to run a function, so this is it. '''
+
+        app = DMatcherApp()  # root widget
+        print(app)
+        print(App.get_running_app())
+        # print(root)
+        async with trio.open_nursery() as nursery:
+            '''In trio you create a nursery, in which you schedule async
+            functions to be run by the nursery simultaneously as tasks.
+
+            This will run all three methods starting in random order
+            asynchronously and then block until they are finished or canceled
+            at the `with` level. '''
+            nursery.start_soon(run_app_happily, app, nursery)
+            # nursery.start_soon(watch_button_closely, root)
+
+    trio.run(root_func)
+    # DMatcherApp().run()
