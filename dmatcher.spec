@@ -2,10 +2,11 @@
 
 block_cipher = None
 
+
 a = Analysis(['client.py'],
              pathex=['C:\\Users\\Thomas\\HPI\\d-matcher'],
              binaries=[],
-             datas=[('venv\\share\\sdl2\\bin\\libpng16-16.dll', '.')],
+             datas=[],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -20,16 +21,16 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='DMatcher',
+          name='dmatcher',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True)
+          console=True )
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
                a.datas,
                strip=False,
                upx=True,
-               name='DMatcher')
+               name='dmatcher')
