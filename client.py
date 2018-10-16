@@ -27,7 +27,6 @@ import src.d_matcher as d_matcher
 class DropFile(Button):
     def __init__(self, **kwargs):
         super(DropFile, self).__init__(**kwargs)
-        print('X')
         app = App.get_running_app()
         app.drops.append(self.on_dropfile)
 
@@ -67,7 +66,6 @@ class DMatcher(FloatLayout):
 
     def __init__(self, **kwargs):
         super(DMatcher, self).__init__(**kwargs)
-        print('DMatcher init')
 
     # --- FileChooser logic -------------------------------------------------- #
 
@@ -103,12 +101,13 @@ class DMatcher(FloatLayout):
         self.input_path = path
 
     def async_execute_algorithm(self):
-        executor = ThreadPoolExecutor(max_workers=1)
-        executor.submit(self.execute_algorithm)
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            call = executor.submit(self.execute_algorithm)
+            call.result()
 
     def execute_algorithm(self):
         app = App.get_running_app()
-        self.app.root.ids.label_result.text = ''
+        app.root.ids.label_result.text = ''
         d_matcher.execute(self.input_path, epochs=100, progressbar=Progressbar)
         app.root.ids.label_status.set_success(
             'Successfully created teaming files. '
@@ -156,13 +155,11 @@ class DMatcherApp(App):
 
     def __init__(self, **kwargs):
         super(DMatcherApp, self).__init__(**kwargs)
-        print('Hi')
 
     def build(self):
         # set an empty list that will be later populated
         # with functions from widgets themselves
         self.drops = []
-        print('Ho')
 
         # bind handling function to 'on_dropfile'
         Window.bind(on_dropfile=self.handledrops)
