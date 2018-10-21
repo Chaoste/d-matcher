@@ -103,6 +103,11 @@ class DMatcher(FloatLayout):
         thread = threading.Thread(target=self.thread_fn)
         thread.start()
 
+    # def async_execute_algorithm(self):
+    #     with ThreadPoolExecutor(max_workers=1) as executor:
+    #         call = executor.submit(self.execute_algorithm)
+    #         call.result()
+
     def thread_fn(self):
         app = App.get_running_app()
         trio.run(init_async_listener, app)
