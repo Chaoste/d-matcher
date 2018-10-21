@@ -46,6 +46,7 @@ def store_output(teaming: Teaming, path: str):
 
 
 def execute(path: str, epochs: int = 6000, progressbar=None):
+    assert path is not None, 'Path of input file may not be None'
     print(f'Execute D-Matcher with {epochs} epochs for input file {path}')
     students = read_input(path)
     teaming = find_teaming(students, epochs=epochs, progressbar=progressbar)

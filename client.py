@@ -26,7 +26,6 @@ import src.d_matcher as d_matcher
 class DropFile(Button):
     def __init__(self, **kwargs):
         super(DropFile, self).__init__(**kwargs)
-        print('X')
         app = App.get_running_app()
         app.drops.append(self.on_dropfile)
 
@@ -66,7 +65,6 @@ class DMatcher(FloatLayout):
 
     def __init__(self, **kwargs):
         super(DMatcher, self).__init__(**kwargs)
-        print('DMatcher init')
         self.init_async_listener()
 
     # --- FileChooser logic -------------------------------------------------- #
@@ -86,7 +84,6 @@ class DMatcher(FloatLayout):
 
     def set_input_path(self, path):
         app = App.get_running_app()
-        print(f'Selected {path} as input file./')
         _, filetype = os.path.splitext(path)
         if filetype != '.csv':
             app.root.ids.label_status.set_error(f'Received invalid file of type {filetype}!')
@@ -108,7 +105,6 @@ class DMatcher(FloatLayout):
 
     def thread_fn(self):
         app = App.get_running_app()
-        print('Running App is', app, app.root)
         trio.run(init_async_listener, app)
 
 
@@ -156,7 +152,6 @@ class DMatcherApp(App):
         # set an empty list that will be later populated
         # with functions from widgets themselves
         self.drops = []
-        print('Ho')
 
         # bind handling function to 'on_dropfile'
         Window.bind(on_dropfile=self.handledrops)
@@ -182,10 +177,9 @@ async def init_async_listener(app):
                 'on_stop', thread_fn=trio.BlockingTrioPortal().run_sync):
             break
         nursery.cancel_scope.cancel()
-    print('completed waiting on app stop')
 
 
-async def watch_button_closely(app, input_path):
+async def watch_button_closely(app):
     '''This method is also run by trio and watches and reacts to the button
     shown in kivy.'''
     root = app.root
@@ -193,8 +187,9 @@ async def watch_button_closely(app, input_path):
     # watch the on_release event of the button and react to every release
     async for _ in root.ids.button_execute.async_bind(
             'on_release', thread_fn=trio.BlockingTrioPortal().run_sync):
+        input_path = app.root.input_path
         await trio_run_in_kivy_thread(
-            execute_algorithm, app, app.root.input_path)
+            execute_algorithm, app, input_path)
 
 
 def execute_algorithm(app, input_path):
