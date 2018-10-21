@@ -100,17 +100,8 @@ class DMatcher(FloatLayout):
         self.input_path = path
 
     def init_async_listener(self):
-        thread = threading.Thread(target=self.thread_fn)
+        thread = threading.Thread(target=lambda: trio.run(init_async_listener))
         thread.start()
-
-    # def async_execute_algorithm(self):
-    #     with ThreadPoolExecutor(max_workers=1) as executor:
-    #         call = executor.submit(self.execute_algorithm)
-    #         call.result()
-
-    def thread_fn(self):
-        app = App.get_running_app()
-        trio.run(init_async_listener, app)
 
 
 class Progressbar:
@@ -173,8 +164,9 @@ class DMatcherApp(App):
         return True
 
 
-async def init_async_listener(app):
+async def init_async_listener():
     '''This method is also run by trio and periodically prints something.'''
+    app = App.get_running_app()
     async with trio.open_nursery() as nursery:
         nursery.start_soon(watch_button_closely, app)
 
@@ -193,12 +185,13 @@ async def watch_button_closely(app):
     async for _ in root.ids.button_execute.async_bind(
             'on_release', thread_fn=trio.BlockingTrioPortal().run_sync):
         input_path = app.root.input_path
-        await trio_run_in_kivy_thread(
-            execute_algorithm, app, input_path)
+        execute_algorithm(app, input_path)
+        # await trio_run_in_kivy_thread(
+        #     execute_algorithm, app, input_path)
 
 
 def execute_algorithm(app, input_path):
-    app.root.ids.label_result.text = 'Starting algorithm'
+    app.root.ids.label_result.text = 'Calculating...'
     d_matcher.execute(
         input_path, epochs=100, progressbar=Progressbar)
     app.root.ids.label_status.set_success(
