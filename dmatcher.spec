@@ -1,13 +1,25 @@
 # -*- mode: python -*-
 
+import os
+
+DEBUG = False
+
 block_cipher = None
 
+app_name = 'D-Matcher'
+
+dir = os.getcwd()
+
+# https://pythonhosted.org/PyInstaller/spec-files.html#adding-data-files
+added_files = [
+  ( os.path.join(dir, 'dmatcher.kv'), '.' ),
+]
 
 a = Analysis(['client.py'],
-             pathex=['C:\\Users\\Thomas\\HPI\\d-matcher'],
+             pathex=['/Users/thomas/work/repos/d-matcher/'],
              binaries=[],
-             datas=[],
-             hiddenimports=[],
+             datas=added_files,
+             hiddenimports=['src'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -21,12 +33,12 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='dmatcher',
-          debug=False,
+          name=app_name,
+          debug=DEBUG,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True )
+          console=DEBUG )
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
