@@ -62,6 +62,7 @@ class StatusLabel(Label):
 class DMatcher(FloatLayout):
     loadfile = ObjectProperty(None)
     input_path = ObjectProperty(None)
+    run = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super(DMatcher, self).__init__(**kwargs)
@@ -108,6 +109,7 @@ class Progressbar:
     def __init__(self, _range):
         self.app = App.get_running_app()
         self._range = _range
+        self.run = self.app.root.run
         self._gen = iter(_range)
         self.app.root.ids.progress_bar.value = 0
 
@@ -126,10 +128,12 @@ class Progressbar:
         return self
 
     def set_description(self, text):
-        self.app.root.ids.label_status.set_status(text)
+        self.app.root.ids.label_status.set_status(f'Run {self.run}: {text}')
 
     def set_final_desc(self, text):
-        self.app.root.ids.label_result.text = text
+        self.app.root.ids.label_result.text = f'Run {self.run}:\n{text}'
+        self.app.root.run += 1
+
 
     def refresh(self):
         # We don't need to force refreshing since kivy will take care of it
@@ -184,16 +188,19 @@ async def watch_button_closely(app):
     # watch the on_release event of the button and react to every release
     async for _ in root.ids.button_execute.async_bind(
             'on_release', thread_fn=trio.BlockingTrioPortal().run_sync):
+        app.root.ids.button_execute.disabled = True
         input_path = app.root.input_path
+        app.root.run = 1
         execute_algorithm(app, input_path)
+        app.root.ids.button_execute.disabled = False
         # await trio_run_in_kivy_thread(
         #     execute_algorithm, app, input_path)
 
 
 def execute_algorithm(app, input_path):
-    app.root.ids.label_result.text = 'Calculating...'
+    app.root.ids.label_result.text = 'Creating 3 different teamings...'
     d_matcher.execute(
-        input_path, epochs=100, progressbar=Progressbar)
+        input_path, epochs=100, progressbar=Progressbar, amount_teamings=3)
     app.root.ids.label_status.set_success(
         'Successfully created teaming files. '
         'They can be found in the same directory as the input file.')
