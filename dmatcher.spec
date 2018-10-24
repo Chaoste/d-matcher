@@ -13,6 +13,7 @@ dir = os.getcwd()
 # https://pythonhosted.org/PyInstaller/spec-files.html#adding-data-files
 added_files = [
   ( os.path.join(dir, 'dmatcher.kv'), '.' ),
+  ( os.path.join(dir, 'background.jpg'), '.' ),
 ]
 
 a = Analysis(['client.py'],
