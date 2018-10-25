@@ -10,6 +10,10 @@ import kivy
 import threading
 kivy.require('1.0.6')
 
+# Disable multitouch - otherwise there's a red dot visible to the user
+from kivy.config import Config
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+
 from kivy.app import App
 from kivy.properties import DictProperty
 from kivy.uix.button import Button

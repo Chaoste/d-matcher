@@ -6,7 +6,7 @@ DEBUG = False
 
 block_cipher = None
 
-app_name = 'D-Matcher'
+app_name = 'DMatcher'
 
 dir = os.getcwd()
 
@@ -17,7 +17,7 @@ added_files = [
 ]
 
 a = Analysis(['client.py'],
-             pathex=['/Users/thomas/work/repos/d-matcher/'],
+             pathex=['/Users/thomas/work/repos/d-matcher'],
              binaries=[],
              datas=added_files,
              hiddenimports=['src'],
@@ -46,4 +46,9 @@ coll = COLLECT(exe,
                a.datas,
                strip=False,
                upx=True,
-               name='dmatcher')
+               name=app_name)
+
+app = BUNDLE(coll,
+             name=f'{app_name}.app',
+             icon=None,
+             bundle_identifier=None)
