@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, List
 from time import gmtime, strftime
 
 import pandas as pd
@@ -36,12 +36,15 @@ def find_teaming(students: pd.DataFrame,
     return teaming
 
 
-def store_output(teaming: Teaming, path: str, no: int):
+def store_output(teamings: List[Teaming], path: str):
+    print(teamings[0].shape)
+    print(teamings[0].index)
+    print(teamings[0].columns)
     directory, filename = os.path.split(path)
     filename, ext = os.path.splitext(filename)
     timestamp = strftime("%Y_%m_%d_%H_%M_%S", gmtime())
-    output_path = os.path.join(directory, f'teamings_{no}__{timestamp}{ext}')
-    utils.store_teaming(teaming, output_path)
+    output_path = os.path.join(directory, f'Teamings__{timestamp}{ext}')
+    # utils.store_teaming(teaming, output_path)
     print('Saved results to {}.'.format(output_path))
 
 
@@ -51,15 +54,15 @@ def execute(path: str, epochs: int = 6000, progressbar = None, amount_teamings =
     print(f'Execute D-Matcher with {epochs} epochs for input file {path}')
     students = read_input(path)
     teaming1 = find_teaming(students, epochs=epochs, progressbar=progressbar)
-    store_output(teaming1, path, no=1)
     if amount_teamings > 1:
         teaming2 = find_teaming(students, epochs=epochs, progressbar=progressbar, previous_teaming=teaming1)
-        store_output(teaming2, path, no=2)
         if amount_teamings > 2:
             teaming3 = find_teaming(students, epochs=epochs, progressbar=progressbar, previous_teaming=(teaming1, teaming2))
-            store_output(teaming3, path, no=3)
+            store_output([teaming1, teaming2, teaming3], path)
             return [teaming1, teaming2, teaming3]
+        store_output([teaming1, teaming2], path)
         return [teaming1, teaming2]
+    store_output([teaming1], path)
     return [teaming1]
 
 

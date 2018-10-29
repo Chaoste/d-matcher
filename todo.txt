@@ -1,0 +1,7 @@
+TODO:
+teamings in one file: 1st, 2nd, Partner
+16 colors for teams
+Color code for disciplines
+Keep columns like first name, last name
+Import & Export xlsx
+2nd project: Split up into orange and yellow track after first teaming

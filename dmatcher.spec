@@ -13,7 +13,8 @@ dir = os.getcwd()
 # https://pythonhosted.org/PyInstaller/spec-files.html#adding-data-files
 added_files = [
   ( os.path.join(dir, 'dmatcher.kv'), '.' ),
-  ( os.path.join(dir, 'background.jpg'), '.' ),
+  ( os.path.join(dir, 'res', 'background.jpg'), os.path.join('.', 'res') ),
+  ( os.path.join(dir, 'res', 'favicon.ico'), os.path.join('.', 'res') ),
 ]
 
 a = Analysis(['client.py'],
@@ -50,5 +51,5 @@ coll = COLLECT(exe,
 
 app = BUNDLE(coll,
              name=f'{app_name}.app',
-             icon=None,
+             icon=os.path.join(dir, 'res', 'favicon_old.ico'),
              bundle_identifier=None)

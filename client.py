@@ -147,7 +147,7 @@ class Progressbar:
 class DMatcherApp(App):
     widgets = DictProperty()
     title = 'D-Matcher'
-    icon = 'icon.png'
+    icon = 'res/favicon.ico'
 
     def __init__(self, **kwargs):
         super(DMatcherApp, self).__init__(**kwargs)
