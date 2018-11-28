@@ -204,7 +204,7 @@ async def watch_button_closely(app):
 def execute_algorithm(app, input_path):
     app.root.ids.label_result.text = 'Creating 3 different teamings...'
     d_matcher.execute(
-        input_path, epochs=100, progressbar=Progressbar, amount_teamings=3)
+        input_path, epochs=10, progressbar=Progressbar, amount_teamings=3)
     app.root.ids.label_status.set_success(
         'Successfully created teaming files. '
         'They can be found in the same directory as the input file.')

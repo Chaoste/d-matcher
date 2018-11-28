@@ -13,7 +13,7 @@ METRICS = ('Gender', 'Discipline', 'Nationality', 'Collision')
 SEMESTER = ('WT-15', 'ST-16', 'WT-16', 'ST-17')
 
 Students = pd.DataFrame
-PreviousTeaming = Optional[Union[pd.DataFrame, Tuple[pd.DataFrame]]]
+PreviousTeaming = Optional[Union[pd.DataFrame, Tuple[pd.DataFrame], List[pd.DataFrame]]]
 Teaming = pd.DataFrame
 TeamingResult = Tuple[pd.DataFrame, np.ndarray]
 
@@ -28,6 +28,8 @@ def find_teaming(students: pd.DataFrame,
                  previous_teaming: PreviousTeaming = None,
                  epochs: int = 6000,
                  progressbar=None) -> TeamingResult:
+    if type(previous_teaming) == list:
+        previous_teaming = tuple(previous_teaming)
     teaming = algo.semo(
         students, epochs=epochs, precision=4,
         previous_teaming=previous_teaming, mutation_intensity=20,
@@ -37,14 +39,20 @@ def find_teaming(students: pd.DataFrame,
 
 
 def store_output(teamings: List[Teaming], path: str):
-    print(teamings[0].shape)
-    print(teamings[0].index)
-    print(teamings[0].columns)
+    teaming_columns = ['1st', '2nd', '3rd']
+    # pd.merge
+    enriched_students = pd.read_csv(path, index_col=0)
+    print(enriched_students.columns)
+    for i, teaming in enumerate(teamings):
+        t = teaming[['hash', 'Team']].rename(
+        {'hash': 'hash', 'Team': teaming_columns[i]}, axis=1)
+        enriched_students = enriched_students.merge(t)
+    print(enriched_students.columns)
     directory, filename = os.path.split(path)
-    filename, ext = os.path.splitext(filename)
+    filename, _ = os.path.splitext(filename)
     timestamp = strftime("%Y_%m_%d_%H_%M_%S", gmtime())
-    output_path = os.path.join(directory, f'Teamings__{timestamp}{ext}')
-    # utils.store_teaming(teaming, output_path)
+    output_path = os.path.join(directory, f'Teamings__{timestamp}')
+    utils.store_teaming(enriched_students, output_path)
     print('Saved results to {}.'.format(output_path))
 
 
@@ -53,17 +61,14 @@ def execute(path: str, epochs: int = 6000, progressbar = None, amount_teamings =
     assert 0 < amount_teamings < 4, 'Only 1, 2 or 3 teamings are possible'
     print(f'Execute D-Matcher with {epochs} epochs for input file {path}')
     students = read_input(path)
-    teaming1 = find_teaming(students, epochs=epochs, progressbar=progressbar)
+    teamings = []
+    teamings.append(find_teaming(students, epochs=epochs, progressbar=progressbar))
     if amount_teamings > 1:
-        teaming2 = find_teaming(students, epochs=epochs, progressbar=progressbar, previous_teaming=teaming1)
-        if amount_teamings > 2:
-            teaming3 = find_teaming(students, epochs=epochs, progressbar=progressbar, previous_teaming=(teaming1, teaming2))
-            store_output([teaming1, teaming2, teaming3], path)
-            return [teaming1, teaming2, teaming3]
-        store_output([teaming1, teaming2], path)
-        return [teaming1, teaming2]
-    store_output([teaming1], path)
-    return [teaming1]
+        teamings.append(find_teaming(students, epochs=epochs, progressbar=progressbar, previous_teaming=teamings[0]))
+    if amount_teamings > 2:
+        teamings.append(find_teaming(students, epochs=epochs, progressbar=progressbar, previous_teaming=teamings))
+    store_output(teamings, path)
+    return teamings
 
 
 if __name__ == '__main__':

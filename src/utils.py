@@ -3,6 +3,7 @@ import itertools as it
 import csv
 
 import src.metrics as metrics
+import src.xlsx_utils as xlsx_utils
 
 # --------------------------------------------------------------------------- #
 # Helper
@@ -21,8 +22,12 @@ def process_semesters(students, target_func, *args, **kwargs):
 
 
 def store_teaming(teaming, filename=None, show_all=True):
+    assert all(teaming.columns[-3:] == ['1st', '2nd', '3rd']), \
+        'Only 3 teamings are supported for xlsx export'
+    xlsx_utils.export(teaming, filename)
+
     # Use the same format as used for the input data
     # Generates FutureWarning: Passing list-likes to .loc or [] with missing label
-    return teaming.to_csv(filename, quoting=csv.QUOTE_MINIMAL, index=False,
-                          columns=None if show_all else ['hash', 'Team'],
-                          sep=',')
+    # return teaming.to_csv(f'{filename}.csv', quoting=csv.QUOTE_MINIMAL, index=False,
+    #                       columns=None if show_all else ['hash', 'Team'],
+    #                       sep=',')
