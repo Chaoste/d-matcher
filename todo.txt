@@ -4,10 +4,9 @@ teamings in one file: 1st, 2nd, Partner
 Export xlsx
 16 colors for teams
 Color code for disciplines
-
+Transform from "M/F, First Name, Name, Nationality, Field of Study" to my expected format
+Create hash codes
+(Optional) import xlsx (+ Client accepts xlsx)
 
 TODO:
-Transform from "M/F	First Name	Name	Nationality	Field of Study" to my expected format
-Create hash code from first name
-Import xlsx
 2nd project: Split up into orange and yellow track after first teaming

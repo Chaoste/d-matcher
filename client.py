@@ -90,7 +90,7 @@ class DMatcher(FloatLayout):
     def set_input_path(self, path):
         app = App.get_running_app()
         _, filetype = os.path.splitext(path)
-        if filetype != '.csv':
+        if filetype != '.csv' and filetype != '.xlsx':
             app.root.ids.label_status.set_error(f'Received invalid file of type {filetype}!')
             return
 
