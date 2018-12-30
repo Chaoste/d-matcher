@@ -73,8 +73,9 @@ def multi_objective(team, previous_teaming=None):
 
 def sem_multi_objective(teaming, previous_teaming=None):
     results = []
-    for i in range(16):
-        team = teaming[teaming['Team'] == i+1]
+    g = teaming.groupby('Team')
+    for team_number, team_idx in g.groups.items():
+        team = teaming.loc[team_idx]
         results.append(multi_objective(team, previous_teaming))
     results = pd.DataFrame(results)
     # Take the average for each objective

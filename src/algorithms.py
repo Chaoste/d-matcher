@@ -5,20 +5,24 @@ from tqdm import tqdm
 import src.metrics as metrics
 
 def arbitrary_teaming(students):
+    n_teams = len(students) // 5
     groups = []
-    for i in range(15):
+    for i in range(n_teams - 1):
         team = students[i*5:(i+1)*5]
         groups.extend((x['hash'], i+1, x['Sex'], x['Discipline'], x['Nationality'])
                       for _, x in team.iterrows())
-    groups.extend((x['hash'], 16, x['Sex'], x['Discipline'], x['Nationality'])
-                  for _, x  in students[75:].iterrows())
+    last_team_idx = len(students) - 5
+    groups.extend((x['hash'], n_teams, x['Sex'], x['Discipline'], x['Nationality'])
+                  for _, x  in students[last_team_idx:].iterrows())
     grouped = pd.DataFrame(groups, columns=['hash', 'Team', 'Sex', 'Discipline', 'Nationality'])
     return grouped
 
 def generate_random_solution(students, previous_teaming, precision):
-    shuffled = np.random.permutation(len(students))
-    teams = np.split(shuffled[:80], 16)
-    teams[-1] = np.append(teams[-1], shuffled[80:])
+    n_students = len(students)
+    n_teams = len(students) // 5
+    shuffled = np.random.permutation(n_students)
+    teams = np.split(shuffled[:n_students], n_teams)
+    teams[-1] = np.append(teams[-1], shuffled[n_students:])
     teaming = pd.concat([students.iloc[idx].assign(Team=i+1) for i, idx in enumerate(teams)])
     metric_values = metrics.sem_multi_objective(teaming, previous_teaming)
     return teaming, round(metric_values, precision)

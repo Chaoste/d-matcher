@@ -49,7 +49,7 @@ def merge_tracks(teamings1, teamings2):
 
 
 def process_semesters(students, target_func, *args, **kwargs):
-    result = []  # pd.DataFrame(columns=['hash', 'Team', 'Semester', 'Sex', 'Discipline', 'Nationality'])
+    result = []
     for semester in ('WT-15', 'ST-16', 'WT-16', 'ST-17'):
         sem_students = students[students['Semester'] == semester]
         assert len(sem_students) in (80, 81),\

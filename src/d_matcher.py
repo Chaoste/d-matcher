@@ -7,7 +7,6 @@ import numpy as np
 
 import src.algorithms as algo
 import src.utils as utils
-# import metrics
 
 METRICS = ('Gender', 'Discipline', 'Nationality', 'Collision')
 SEMESTER = ('WT-15', 'ST-16', 'WT-16', 'ST-17')
@@ -36,14 +35,18 @@ def read_and_transform_input(path: str) -> pd.DataFrame:
 def find_teaming(students: pd.DataFrame,
                  previous_teaming: PreviousTeaming = None,
                  epochs: int = 6000,
+                 is_second_track: bool = False,
                  progressbar=None) -> TeamingResult:
     if type(previous_teaming) == list:
         previous_teaming = tuple(previous_teaming)
+    if type(previous_teaming) == tuple and len(previous_teaming) == 1:
+        previous_teaming = previous_teaming[0]
     teaming = algo.semo(
         students, epochs=epochs, precision=4,
         previous_teaming=previous_teaming, mutation_intensity=20,
-        progressbar=progressbar) \
-        .reset_index()
+        progressbar=progressbar)
+    if is_second_track:
+        teaming['Team'] += 8
     return teaming
 
 
@@ -82,16 +85,14 @@ def execute(path: str, epochs: int = 6000, progressbar = None,
         assert amount_teamings == 3, 'Splitting into orange and yellow track'\
             'are only supported for creating three teamings'
         teamings1, teamings2, students1, students2 = utils.split_tracks(teamings[0], students)
-        assert False, 'Currently not supported'
-        # TODO: SEMO only supprots 80 students
         teamings1.append(find_teaming(students1, epochs=epochs, progressbar=progressbar, previous_teaming=teamings1))
         teamings1.append(find_teaming(students1, epochs=epochs, progressbar=progressbar, previous_teaming=teamings1))
-        teamings2.append(find_teaming(students2, epochs=epochs, progressbar=progressbar, previous_teaming=teamings2))
-        teamings2.append(find_teaming(students2, epochs=epochs, progressbar=progressbar, previous_teaming=teamings2))
+        teamings2.append(find_teaming(students2, epochs=epochs, progressbar=progressbar, previous_teaming=teamings2, is_second_track=True))
+        teamings2.append(find_teaming(students2, epochs=epochs, progressbar=progressbar, previous_teaming=teamings2, is_second_track=True))
         teamings = utils.merge_tracks(teamings1, teamings2)
     store_output(teamings, path)
     return teamings
 
 
 if __name__ == '__main__':
-    execute('input/students_wt_15.csv', epochs=300, amount_teamings=3)
+    execute('input/students_wt_15.csv', epochs=3, amount_teamings=3)
