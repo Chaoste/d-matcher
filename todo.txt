@@ -7,6 +7,4 @@ Color code for disciplines
 Transform from "M/F, First Name, Name, Nationality, Field of Study" to my expected format
 Create hash codes
 (Optional) import xlsx (+ Client accepts xlsx)
-
-TODO:
 2nd project: Split up into orange and yellow track after first teaming
