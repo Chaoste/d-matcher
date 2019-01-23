@@ -21,6 +21,9 @@ def generate_random_solution(students, previous_teaming, precision):
     n_students = len(students)
     n_teams = len(students) // 5
     shuffled = np.random.permutation(n_students)
+    print(n_teams)
+    print(n_students)
+    print(shuffled)
     teams = np.split(shuffled[:n_students], n_teams)
     teams[-1] = np.append(teams[-1], shuffled[n_students:])
     teaming = pd.concat([students.iloc[idx].assign(Team=i+1) for i, idx in enumerate(teams)])
@@ -69,6 +72,7 @@ def semo(students, semester=None, debug=False, init_P=None, epochs=5,
          mutation_intensity=3, previous_teaming=None, precision=2, progressbar=None):
     # Give the ability to run the function multiple times on the same collection
     # of Pareto elements. Each element consists of a tuple (solution, metrics)
+    print(students)
     if init_P is None:
         P = [generate_random_solution(students, previous_teaming, precision)]
     else:

@@ -51,5 +51,5 @@ coll = COLLECT(exe,
 
 app = BUNDLE(coll,
              name=f'{app_name}.app',
-             icon=os.path.join(dir, 'res', 'favicon_old.ico'),
+             icon=os.path.join(dir, 'res', 'favicon48.icns'),
              bundle_identifier=None)

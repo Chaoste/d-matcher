@@ -8,3 +8,20 @@ Transform from "M/F, First Name, Name, Nationality, Field of Study" to my expect
 Create hash codes
 (Optional) import xlsx (+ Client accepts xlsx)
 2nd project: Split up into orange and yellow track after first teaming
+
+TODO:
+- Benachrichtung wenn fertig
+- Mehr Epochs
+- Drag & Drop
+- Icon
+- Enter Taste
+- Error Reporting
+- Gender neutral
+- 75-85 people
+- never less than 4
+- strictly punish collisions
+- describe xslx format
+- m/f großschreibung
+
+[optional]
+- select columns of features

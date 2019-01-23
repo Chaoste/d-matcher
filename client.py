@@ -26,6 +26,8 @@ from kivy.utils import trio_run_in_kivy_thread
 
 import src.d_matcher as d_matcher
 
+EPOCHS = 150
+
 
 class DropFile(Button):
     def __init__(self, **kwargs):
@@ -204,7 +206,7 @@ async def watch_button_closely(app):
 def execute_algorithm(app, input_path):
     app.root.ids.label_result.text = 'Creating 3 different teamings...'
     d_matcher.execute(
-        input_path, epochs=10, progressbar=Progressbar, amount_teamings=3)
+        input_path, epochs=EPOCHS, progressbar=Progressbar, amount_teamings=3)
     app.root.ids.label_status.set_success(
         'Successfully created teaming files. '
         'They can be found in the same directory as the input file.')
