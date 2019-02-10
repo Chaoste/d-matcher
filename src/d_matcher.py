@@ -1,4 +1,5 @@
 import os
+import itertools
 from typing import Optional, Tuple, Union, List
 from time import gmtime, strftime
 
@@ -87,12 +88,23 @@ def execute(path: str, epochs: int = 6000, progressbar = None,
         teamings1, teamings2, students1, students2 = utils.split_tracks(teamings[0], students)
         teamings1.append(find_teaming(students1, epochs=epochs, progressbar=progressbar, previous_teaming=teamings1))
         teamings1.append(find_teaming(students1, epochs=epochs, progressbar=progressbar, previous_teaming=teamings1))
+
         teamings2.append(find_teaming(students2, epochs=epochs, progressbar=progressbar, previous_teaming=teamings2, is_second_track=True))
         teamings2.append(find_teaming(students2, epochs=epochs, progressbar=progressbar, previous_teaming=teamings2, is_second_track=True))
-        teamings = utils.merge_tracks(teamings1, teamings2)
-    store_output(teamings, path)
+        teamings = utils.merge_tracks(teamings1, teamings2)        
+    # store_output(teamings, path)
     return teamings
 
+def get_matches(teamings, s1, s2):
+    for i, teaming in enumerate(teamings):
+        if teaming['Team'][s1] == teaming['Team'][s2]:
+            yield str(i)
+
+def get_collisions(teamings):
+    for s1, s2 in itertools.combinations(sorted(teamings[0].index), 2):
+        matches = list(get_matches(teamings, s1, s2))
+        if len(matches) > 1:
+            yield f"{s1}, {s2}, {'-'.join(matches)}"
 
 if __name__ == '__main__':
     execute('input/students_wt_15.csv', epochs=3, amount_teamings=3)

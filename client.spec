@@ -29,8 +29,8 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           runtime_tmpdir=None,
-          console=False , icon='res/favicon.ico')
+          console=False , icon='res/favicon-v2.ico')
 app = BUNDLE(exe,
              name='client.app',
-             icon='res/favicon.ico',
+             icon='res/favicon-v2.ico',
              bundle_identifier=None)

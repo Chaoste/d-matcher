@@ -1,3 +1,5 @@
+import itertools
+
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -21,19 +23,51 @@ def generate_random_solution(students, previous_teaming, precision):
     n_students = len(students)
     n_teams = len(students) // 5
     shuffled = np.random.permutation(n_students)
-    print(n_teams)
-    print(n_students)
-    print(shuffled)
+    # print(n_teams)
+    # print(n_students)
+    # print(shuffled)
     teams = np.split(shuffled[:n_students], n_teams)
     teams[-1] = np.append(teams[-1], shuffled[n_students:])
     teaming = pd.concat([students.iloc[idx].assign(Team=i+1) for i, idx in enumerate(teams)])
     metric_values = metrics.sem_multi_objective(teaming, previous_teaming)
     return teaming, round(metric_values, precision)
 
+def get_collisions(teaming, previous_teaming):
+    collisions = []
+    involved_students = []
+    if previous_teaming is None:
+        return collisions, involved_students
+    if not isinstance(previous_teaming, tuple):
+        previous_teaming = (previous_teaming,)
+    for entry, (s1, s2) in enumerate(itertools.combinations(sorted(teaming.index), 2)):
+        if teaming['Team'][s1] != teaming['Team'][s2]:
+            continue
+        for i, pteaming in enumerate(previous_teaming):
+            if pteaming['Team'][s1] == pteaming['Team'][s2]:
+                collisions.append(entry)
+                involved_students.append(s1)
+                involved_students.append(s2)
+                break
+    return collisions, set(involved_students)
+
 def mutate(teaming, steps, previous_teaming, precision):
     mutation = pd.DataFrame(teaming.copy())
     for _ in range(steps):
-        i1, i2 = np.random.choice(mutation.index, 2, replace=False)
+        pairs = list(itertools.combinations(sorted(mutation.index), 2))
+        p = np.ones(len(pairs), dtype=int)
+        collisions, involved_students = get_collisions(mutation, previous_teaming)
+        for i, pair in enumerate(pairs):
+            if pair[0] in involved_students or pair[1] in involved_students:
+                print(i, pair, mutation['Team'][pair[0]], mutation['Team'][pair[1]])
+                p[i] = 4
+        for col in collisions:
+            p[col] = 0
+        if len(collisions):
+            print(collisions)
+            print(involved_students)
+            print(' '.join([str(x) for x in p]))
+            assert False
+        i1, i2 = pairs[np.random.choice(len(pairs), p=p/sum(p))]
         temp = mutation['Team'][i1]
         mutation.loc[i1, 'Team'] = mutation['Team'][i2]
         mutation.loc[i2, 'Team'] = temp
@@ -47,7 +81,10 @@ def check_domination(P, new_x):
     for i, p in enumerate(P):
         any_greater_than_new_x = any(p[1] > new_x[1])
         any_lower_than_new_x = any(p[1] < new_x[1])
-        if not any_lower_than_new_x and any_greater_than_new_x:
+        if new_x[1]['Collision'] < p[1]['Collision']:
+            # Manual tweak: new_x dominates p regarding collisions
+            relation[i] = -1
+        elif not any_lower_than_new_x and any_greater_than_new_x:
             # new_x dominates p
             relation[i] = -1
         elif not any_greater_than_new_x and any_lower_than_new_x:
@@ -58,7 +95,6 @@ def check_domination(P, new_x):
     # print('Removing {} out of {} elements'.format(sum(relation == - 1), len(P)))
     P = list(np.array(P)[relation > -1])
     if all(relation < 1) and not found_equal:
-        # print('Adding dominating element')
         # No element dominates new_x
         P.append(new_x)
     return P
@@ -72,7 +108,6 @@ def semo(students, semester=None, debug=False, init_P=None, epochs=5,
          mutation_intensity=3, previous_teaming=None, precision=2, progressbar=None):
     # Give the ability to run the function multiple times on the same collection
     # of Pareto elements. Each element consists of a tuple (solution, metrics)
-    print(students)
     if init_P is None:
         P = [generate_random_solution(students, previous_teaming, precision)]
     else:
@@ -85,8 +120,8 @@ def semo(students, semester=None, debug=False, init_P=None, epochs=5,
             x2 = mutate(x[0], mutation_intensity, previous_teaming, precision)
             # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #2')
             P = check_domination(P, x2)
-            if i % 10 == 0:
-                scores = metrics.sem_multi_objective(x2[0])
+            if i % np.ceil(epochs / 100) == 0:
+                scores = best_element(P)[1]
                 score_str = ' | '.join([f'{x:.2f}' for x in scores])
                 bar.set_description(f"Errors: {score_str} => {scores.mean():.3f}")
                 bar.refresh()  # to show immediately the update

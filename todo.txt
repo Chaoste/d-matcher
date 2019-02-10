@@ -8,13 +8,13 @@ Transform from "M/F, First Name, Name, Nationality, Field of Study" to my expect
 Create hash codes
 (Optional) import xlsx (+ Client accepts xlsx)
 2nd project: Split up into orange and yellow track after first teaming
-
-TODO:
-- Benachrichtung wenn fertig
-- Mehr Epochs
+Benachrichtung wenn fertig
 - Drag & Drop
+- merge progressbar runs
 - Icon
 - Enter Taste
+
+TODO:
 - Error Reporting
 - Gender neutral
 - 75-85 people
@@ -22,6 +22,7 @@ TODO:
 - strictly punish collisions
 - describe xslx format
 - m/f großschreibung
+- Mehr Epochs
 
 [optional]
 - select columns of features

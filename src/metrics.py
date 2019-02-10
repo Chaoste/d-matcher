@@ -6,6 +6,8 @@ import itertools as it
 # Multi-objective definition
 #------------------------------------------------------------------------------#
 
+COLLISIONS_PUNISHMENT = 5
+
 def metric_gender_balance(team):
     k = len(team)
     assert k in (5,6), team
@@ -52,13 +54,13 @@ def metric_collision(team, previous_teaming=None):
         collisions = sum((previous_teaming1['Team'][s1] == previous_teaming1['Team'][s2]) + \
                          (previous_teaming2['Team'][s1] == previous_teaming2['Team'][s2])
                          for s1, s2 in it.combinations(team.index, 2))
-        possible_collisions = 20 if k == 5 else 30  # k * (k - 1) / 2
+        possible_collisions = 20 if k == 5 else 30  # 2 * (k * (k - 1) / 2)
         return collisions / possible_collisions
     collisions = sum(previous_teaming['Team'][s1] == previous_teaming['Team'][s2]
                      for s1, s2 in it.combinations(team.index, 2))
     # Normalize using the gaussian summation formula
     possible_collisions = 10 if k == 5 else 15  # k * (k - 1) / 2
-    return collisions / possible_collisions
+    return (collisions / possible_collisions) ** (1/COLLISIONS_PUNISHMENT)
 
 def multi_objective(team, previous_teaming=None):
     metric = pd.Series(index=['Gender', 'Discipline', 'Nationality', 'Collision'])
@@ -78,8 +80,10 @@ def sem_multi_objective(teaming, previous_teaming=None):
         team = teaming.loc[team_idx]
         results.append(multi_objective(team, previous_teaming))
     results = pd.DataFrame(results)
+    reported = np.mean(results, axis=0)
+    reported['Collision'] = max(results['Collision'])
     # Take the average for each objective
-    return np.mean(results, axis=0)
+    return reported
 
 def overall_multi_objective(teaming, previous_teaming=None):
     results = []
