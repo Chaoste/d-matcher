@@ -1,72 +1,58 @@
 import itertools
+import datetime
 
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
 import src.metrics as metrics
-
-def arbitrary_teaming(students):
-    n_teams = len(students) // 5
-    groups = []
-    for i in range(n_teams - 1):
-        team = students[i*5:(i+1)*5]
-        groups.extend((x['hash'], i+1, x['Sex'], x['Discipline'], x['Nationality'])
-                      for _, x in team.iterrows())
-    last_team_idx = len(students) - 5
-    groups.extend((x['hash'], n_teams, x['Sex'], x['Discipline'], x['Nationality'])
-                  for _, x  in students[last_team_idx:].iterrows())
-    grouped = pd.DataFrame(groups, columns=['hash', 'Team', 'Sex', 'Discipline', 'Nationality'])
-    return grouped
+from src.utils import get_closest_power
 
 def generate_random_solution(students, previous_teaming, precision):
     n_students = len(students)
-    n_teams = len(students) // 5
+    n_teams = get_closest_power(len(students) // 5)
     shuffled = np.random.permutation(n_students)
-    # print(n_teams)
-    # print(n_students)
-    # print(shuffled)
-    teams = np.split(shuffled[:n_students], n_teams)
-    teams[-1] = np.append(teams[-1], shuffled[n_students:])
+    teams = np.array_split(shuffled, n_teams)
     teaming = pd.concat([students.iloc[idx].assign(Team=i+1) for i, idx in enumerate(teams)])
     metric_values = metrics.sem_multi_objective(teaming, previous_teaming)
     return teaming, round(metric_values, precision)
 
-def get_collisions(teaming, previous_teaming):
+def get_collisions(teaming, previous_teaming, pairs):
     collisions = []
-    involved_students = []
+    is_involved = dict(zip(teaming.index, np.zeros_like(teaming.index, dtype=bool)))
     if previous_teaming is None:
-        return collisions, involved_students
+        return collisions, is_involved
     if not isinstance(previous_teaming, tuple):
         previous_teaming = (previous_teaming,)
-    for entry, (s1, s2) in enumerate(itertools.combinations(sorted(teaming.index), 2)):
+    for entry, (s1, s2) in enumerate(pairs):
         if teaming['Team'][s1] != teaming['Team'][s2]:
             continue
         for i, pteaming in enumerate(previous_teaming):
             if pteaming['Team'][s1] == pteaming['Team'][s2]:
                 collisions.append(entry)
-                involved_students.append(s1)
-                involved_students.append(s2)
+                is_involved[s1] = True
+                is_involved[s2] = True
                 break
-    return collisions, set(involved_students)
+    return collisions, is_involved
 
-def mutate(teaming, steps, previous_teaming, precision):
+# Mac (20 steps) run time: 0.13s, with pteaming (40 students): 0.07s
+def mutate(teaming, steps, previous_teaming, precision, pairs):
     mutation = pd.DataFrame(teaming.copy())
     for _ in range(steps):
-        pairs = list(itertools.combinations(sorted(mutation.index), 2))
         p = np.ones(len(pairs), dtype=int)
-        collisions, involved_students = get_collisions(mutation, previous_teaming)
-        for i, pair in enumerate(pairs):
-            if pair[0] in involved_students or pair[1] in involved_students:
-                print(i, pair, mutation['Team'][pair[0]], mutation['Team'][pair[1]])
-                p[i] = 4
-        for col in collisions:
-            p[col] = 0
-        if len(collisions):
-            print(collisions)
-            print(involved_students)
-            print(' '.join([str(x) for x in p]))
-            assert False
+        if previous_teaming is None:
+            for i, (s1, s2) in enumerate(pairs):
+                # Don't switch partners from the same team
+                if mutation['Team'][s1] == mutation['Team'][s2]:
+                    p[i] = 0
+        else:
+            collisions, is_involved = get_collisions(mutation, previous_teaming, pairs)
+            for i, (s1, s2) in enumerate(pairs):
+                if mutation['Team'][s1] == mutation['Team'][s2]:
+                    p[i] = 0
+                # Partner collisions should be more likely switched
+                elif is_involved[s1] or is_involved[s2]:
+                    p[i] = 4
         i1, i2 = pairs[np.random.choice(len(pairs), p=p/sum(p))]
         temp = mutation['Team'][i1]
         mutation.loc[i1, 'Team'] = mutation['Team'][i2]
@@ -112,12 +98,13 @@ def semo(students, semester=None, debug=False, init_P=None, epochs=5,
         P = [generate_random_solution(students, previous_teaming, precision)]
     else:
         P = init_P
+    pairs = list(itertools.combinations(sorted(P[0][0].index), 2))
     bar = (progressbar or tqdm)(range(epochs))
     for i in bar:
         try:
             x = P[np.random.choice(range(len(P)), 1)[0]]
             # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #1')
-            x2 = mutate(x[0], mutation_intensity, previous_teaming, precision)
+            x2 = mutate(x[0], mutation_intensity, previous_teaming, precision, pairs)
             # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #2')
             P = check_domination(P, x2)
             if i % np.ceil(epochs / 100) == 0:

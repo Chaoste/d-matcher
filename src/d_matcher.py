@@ -37,15 +37,15 @@ def find_teaming(students: pd.DataFrame,
                  previous_teaming: PreviousTeaming = None,
                  epochs: int = 6000,
                  is_second_track: bool = False,
+                 mutation_intensity: int = 20,
                  progressbar=None) -> TeamingResult:
     if type(previous_teaming) == list:
         previous_teaming = tuple(previous_teaming)
     if type(previous_teaming) == tuple and len(previous_teaming) == 1:
         previous_teaming = previous_teaming[0]
     teaming = algo.semo(
-        students, epochs=epochs, precision=4,
-        previous_teaming=previous_teaming, mutation_intensity=20,
-        progressbar=progressbar)
+        students, epochs=epochs, precision=4, previous_teaming=previous_teaming,
+        mutation_intensity=mutation_intensity, progressbar=progressbar)
     if is_second_track:
         teaming['Team'] += 8
     return teaming
@@ -69,29 +69,28 @@ def store_output(teamings: List[Teaming], path: str):
     print('Saved results to {}.'.format(output_path))
 
 
-def execute(path: str, epochs: int = 6000, progressbar = None,
-            amount_teamings = 1, split_after_first_teamings=True):
+def execute(path: str, amount_teamings = 1, split_after_first_teamings=True, **kwargs):
     assert path is not None, 'Path of input file may not be None'
     assert 0 < amount_teamings < 4, 'Only 1, 2 or 3 teamings are possible'
-    print(f'Execute D-Matcher with {epochs} epochs for input file {path}')
+    print(f'Execute D-Matcher with {kwargs["epochs"]} epochs for input file {path}')
     students = read_and_transform_input(path)
     teamings = []
-    teamings.append(find_teaming(students, epochs=epochs, progressbar=progressbar))
+    teamings.append(find_teaming(students, **kwargs))
     if not split_after_first_teamings:
         if amount_teamings > 1:
-            teamings.append(find_teaming(students, epochs=epochs, progressbar=progressbar, previous_teaming=teamings[0]))
+            teamings.append(find_teaming(students, **kwargs, previous_teaming=teamings))
         if amount_teamings > 2:
-            teamings.append(find_teaming(students, epochs=epochs, progressbar=progressbar, previous_teaming=teamings))
+            teamings.append(find_teaming(students, **kwargs, previous_teaming=teamings))
     else:
         assert amount_teamings == 3, 'Splitting into orange and yellow track'\
             'are only supported for creating three teamings'
         teamings1, teamings2, students1, students2 = utils.split_tracks(teamings[0], students)
-        teamings1.append(find_teaming(students1, epochs=epochs, progressbar=progressbar, previous_teaming=teamings1))
-        teamings1.append(find_teaming(students1, epochs=epochs, progressbar=progressbar, previous_teaming=teamings1))
+        teamings1.append(find_teaming(students1, **kwargs, previous_teaming=teamings1))
+        teamings1.append(find_teaming(students1, **kwargs, previous_teaming=teamings1))
 
-        teamings2.append(find_teaming(students2, epochs=epochs, progressbar=progressbar, previous_teaming=teamings2, is_second_track=True))
-        teamings2.append(find_teaming(students2, epochs=epochs, progressbar=progressbar, previous_teaming=teamings2, is_second_track=True))
-        teamings = utils.merge_tracks(teamings1, teamings2)        
+        teamings2.append(find_teaming(students2, **kwargs, previous_teaming=teamings2, is_second_track=True))
+        teamings2.append(find_teaming(students2, **kwargs, previous_teaming=teamings2, is_second_track=True))
+        teamings = utils.merge_tracks(teamings1, teamings2)
     # store_output(teamings, path)
     return teamings
 

@@ -1,6 +1,7 @@
 import pandas as pd
 import itertools as it
 import csv
+import math
 import hashlib
 
 import src.metrics as metrics
@@ -52,8 +53,8 @@ def process_semesters(students, target_func, *args, **kwargs):
     result = []
     for semester in ('WT-15', 'ST-16', 'WT-16', 'ST-17'):
         sem_students = students[students['Semester'] == semester]
-        assert len(sem_students) in (80, 81),\
-            'Expected 80 or 81 students but got {}'.format(len(students))
+        assert metrics.MIN_STUDENTS <= len(sem_teaming) <= metrics.MAX_STUDENTS,\
+            'Expected between 75 and 85 students but got {}'.format(len(sem_teaming))
         partial_result = target_func(sem_students, semester, *args, **kwargs)
         result.append(partial_result)
     return pd.DataFrame(pd.concat(result).copy(), index=range(321))
@@ -70,3 +71,7 @@ def store_teaming(teaming, filename=None, show_all=True, xlsx=True):
         return teaming.to_csv(f'{filename}.csv', quoting=csv.QUOTE_MINIMAL, index=False,
                               columns=None if show_all else ['hash', 'Team'],
                               sep=',')
+
+# Get power of 2 which is closest to num
+def get_closest_power(num):
+    return 2 ** round(math.log(num, 2))
