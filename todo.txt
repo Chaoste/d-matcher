@@ -16,13 +16,18 @@ CHECK:
 - 75-85 people -> never less than 4 (-> always assumes 8/16 teams)
 - Mehr Epochs (200 -> 20-30 collisions)
 - m/f großschreibung (intern wird es lowercased)
+- strictly punish collisions
+- Inspect why P is not growing that fast (results are too random - maybe because of the first element in P)
+  -> first random solution is usually not bad to start with (my heuristic is worse)
+  -> P is cleaned up many times due to new better solutions
+- Adapted collision measurement and remove manual tweak
 
 TODO:
-- strictly punish collisions
 - Error Reporting
 - describe xslx format
 
 [optional]
-- select columns of features
+- Insert intensity
+- Select columns of features
 - Enter Taste
-- merge progressbars in terminal (intern in dmatcher package)
+- Merge progressbars in terminal (intern in dmatcher package)

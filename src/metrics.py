@@ -6,7 +6,7 @@ import itertools as it
 # Multi-objective definition
 #------------------------------------------------------------------------------#
 
-COLLISIONS_PUNISHMENT = 5
+COLLISIONS_PUNISHMENT = 1
 MIN_STUDENTS = 75
 MAX_STUDENTS = 85
 
@@ -83,7 +83,8 @@ def sem_multi_objective(teaming, previous_teaming=None):
         results.append(multi_objective(team, previous_teaming))
     results = pd.DataFrame(results)
     reported = np.mean(results, axis=0)
-    reported['Collision'] = max(results['Collision'])
+    # Collision metric is always more important than the others
+    reported['Collision'] = 10 * np.mean(results['Collision'])
     # Take the average for each objective
     return reported
 
