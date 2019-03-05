@@ -1,4 +1,11 @@
 from src.d_matcher import execute, get_collisions
+import sys
+
+teaming = execute('~/Sample Student List.xlsx', epochs=2,
+                  mutation_intensity=100, amount_teamings=3)
+print(len(list(get_collisions(teaming))))
+sys.exit(0)
+
 
 # execute('input/students_wt_15.csv', epochs=3, amount_teamings=3)
 # execute('input/new_students_wt_15.csv', epochs=3, amount_teamings=3)

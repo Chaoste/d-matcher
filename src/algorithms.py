@@ -169,8 +169,10 @@ def semo(students, semester=None, debug=False, init_P=None, epochs=5,
                 bar.set_description(f"Errors: {score_str} => {overall_score(scores):.3f}")
                 bar.refresh()  # to show immediately the update
                 # metric_values = metrics.sem_multi_objective(x2[0], previous_teaming)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as e:
             print(f'User Interaction: Stopped earlier at epoch {i} !')
+            if i == 0:
+                raise e
             break
     best = best_element(P)
     print('\nBest solution out of {} elements:'.format(len(P)))

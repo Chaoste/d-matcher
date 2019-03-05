@@ -21,13 +21,17 @@ CHECK:
   -> first random solution is usually not bad to start with (my heuristic is worse)
   -> P is cleaned up many times due to new better solutions
 - Adapted collision measurement and remove manual tweak
+- DMatcher: Error Reporting
+- Recognize ~ as HOME path
+- Spacing & Centering of columns
+- Enter Taste works
+- Remove key down callback on dismissed popup
+- Kivy: Error Reporting UI
 
 TODO:
-- Error Reporting
 - describe xslx format
 
 [optional]
 - Insert intensity
-- Select columns of features
-- Enter Taste
 - Merge progressbars in terminal (intern in dmatcher package)
+- Select columns of features (?)

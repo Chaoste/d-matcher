@@ -27,7 +27,7 @@
                 text: 'D-Matcher'
                 text_size: self.width, 200
                 font: 'Calibri Light'
-                font_size: 28
+                font_size: '20dp'
                 halign: 'center'
                 valign: 'middle'
 
@@ -37,7 +37,7 @@
             DropFile:
                 id: drop_area
                 text: 'Drop or select the input file (.csv)'
-                height: '14dp'
+                font_size: '16dp'
                 background_normal: ''
                 background_color: .4, .3, .7, 1
                 on_release: root.show_load()
@@ -49,7 +49,7 @@
                     text: 'No File Selected'
                     text_size: self.width, 200
                     font: 'Calibri Light'
-                    font_size: 14
+                    font_size: '12dp'
                     halign: 'center'
                     valign: 'middle'
 
@@ -63,6 +63,8 @@
                     id: button_execute
                     text: 'Calculate Teams'
                     disabled: True
+                    background_normal: ''
+                    background_color: .4, .3, .7, 1
                 BoxLayout:
                     size_hint: 0.2, 1
 
@@ -104,8 +106,7 @@
             path: str(pathlib.Path.home())
 
         BoxLayout:
-            size_hint_y: None
-            height: 30
+            size_hint_y: 0.1
             Button:
                 text: "Cancel"
                 on_release: root.cancel()

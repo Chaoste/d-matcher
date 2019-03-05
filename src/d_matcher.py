@@ -1,5 +1,6 @@
 import os
 import itertools
+import traceback
 from typing import Optional, Tuple, Union, List
 from time import gmtime, strftime
 
@@ -8,6 +9,7 @@ import numpy as np
 
 import src.algorithms as algo
 import src.utils as utils
+import src.xlsx_utils as xlsx_utils
 
 METRICS = ('Gender', 'Discipline', 'Nationality', 'Collision')
 SEMESTER = ('WT-15', 'ST-16', 'WT-16', 'ST-17')
@@ -22,6 +24,7 @@ TeamingResult = Tuple[pd.DataFrame, np.ndarray]
 def read_input(path: str) -> pd.DataFrame:
     if path[-5:] == '.xlsx':
         students = pd.read_excel(path)
+        students = xlsx_utils.remove_hidden_columns(students, path)
     else:
         students = pd.read_csv(path, index_col=0)
     return students
@@ -66,10 +69,10 @@ def store_output(teamings: List[Teaming], path: str):
     output_path = os.path.join(directory, f'Teamings__{timestamp}')
     enriched_students.drop(columns="hash", inplace=True)
     utils.store_teaming(enriched_students, output_path)
-    print('Saved results to {}.'.format(output_path))
 
 
 def execute(path: str, amount_teamings = 1, split_after_first_teamings=True, **kwargs):
+    path = os.path.expanduser(path)
     assert path is not None, 'Path of input file may not be None'
     assert 0 < amount_teamings < 4, 'Only 1, 2 or 3 teamings are possible'
     print(f'Execute D-Matcher with {kwargs["epochs"]} epochs for input file {path}')
@@ -91,7 +94,7 @@ def execute(path: str, amount_teamings = 1, split_after_first_teamings=True, **k
         teamings2.append(find_teaming(students2, **kwargs, previous_teaming=teamings2, is_second_track=True))
         teamings2.append(find_teaming(students2, **kwargs, previous_teaming=teamings2, is_second_track=True))
         teamings = utils.merge_tracks(teamings1, teamings2)
-    # store_output(teamings, path)
+    store_output(teamings, path)
     return teamings
 
 def get_matches(teamings, s1, s2):

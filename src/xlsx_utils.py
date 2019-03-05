@@ -1,3 +1,4 @@
+import openpyxl
 import pandas as pd
 
 teaming_columns = ['1st', '2nd', 'Partner']
@@ -58,10 +59,27 @@ def add_discipline_colors(teaming, workbook, worksheet):
 def export(teaming, filename):
     # Create a Pandas Excel writer using XlsxWriter as the engine.
     writer = pd.ExcelWriter(f'{filename}.xlsx', engine='xlsxwriter')
-    teaming.to_excel(writer, sheet_name='Teamings')
+    teaming.to_excel(writer, sheet_name='Teamings', index=False)
     workbook = writer.book
     worksheet = writer.sheets['Teamings']
     add_teaming_colors(teaming, workbook, worksheet)
     add_discipline_colors(teaming, workbook, worksheet)
-
+    centered = workbook.add_format()
+    centered.set_align('center')
+    for idx, col_name in enumerate(teaming):
+        col_len = max((
+            teaming[col_name].astype(str).str.len().max(),  # len of largest item
+            len(str(col_name))  # len of column name/header
+        )) + 1  # Adding a little extra space
+        worksheet.set_column(idx, idx, col_len, centered if col_len < 5 else None)
     writer.save()
+
+
+def remove_hidden_columns(df, file):
+    wb = openpyxl.load_workbook(file)
+    ws = wb.worksheets[0]
+    visible_columns = []
+    for i, (_, col_dim) in enumerate(ws.column_dimensions.items()):
+        if col_dim.hidden != True:
+            visible_columns.append(i)
+    return df[df.columns[visible_columns]]

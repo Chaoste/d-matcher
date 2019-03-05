@@ -1,5 +1,6 @@
 __version__ = '1.0'
 
+import traceback
 import os
 import trio
 
@@ -57,6 +58,8 @@ class LoadDialog(FloatLayout):
             filechooser = self.ids.filechooser
             if filechooser.path and filechooser.selection:
                 self.load(filechooser.path, filechooser.selection)
+        else:
+            print("Unknown keycode", keycode)
 
 
 class StatusLabel(Label):
@@ -88,6 +91,15 @@ class DMatcher(FloatLayout):
 
     # --- FileChooser logic -------------------------------------------------- #
 
+    def show_error(self, error):
+        print(error)
+        app = App.get_running_app()
+        self._error_popup = Popup(
+            title="Error occurred", size_hint=(0.8, 0.4),
+            content=Label(text=error, halign="center"))
+        self._error_popup.bind(on_dismiss=app.stop)
+        self._error_popup.open()
+
     def show_load(self):
         content = LoadDialog(load=self.load, cancel=self.dismiss_popup)
         self._popup = Popup(title="Load file", content=content,
@@ -100,6 +112,7 @@ class DMatcher(FloatLayout):
 
     def dismiss_popup(self):
         self._popup.dismiss()
+        Window.unbind(on_key_down=self._popup.content._on_keyboard_down)
 
     def set_input_path(self, path):
         app = App.get_running_app()
@@ -113,8 +126,8 @@ class DMatcher(FloatLayout):
         # Set background to default behaviour (initial dark, hovered light)
         app.root.ids.drop_area.background_normal = app.root.ids.button_execute.background_normal
         app.root.ids.drop_area.background_color = [0.1, 0.4, 0.1, 1]
-        app.root.ids.button_execute.background_normal = ''
-        app.root.ids.button_execute.background_color = [0.1, 0.4, 0.1, 1]
+        # app.root.ids.button_execute.background_normal = ''
+        # app.root.ids.button_execute.background_color = [0.1, 0.4, 0.1, 1]
         app.root.ids.button_execute.disabled = False
         self.input_path = path
 
@@ -216,6 +229,8 @@ async def watch_button_closely(app):
     '''This method is also run by trio and watches and reacts to the button
     shown in kivy.'''
     root = app.root
+    if root is None:
+        return
 
     # watch the on_release event of the button and react to every release
     async for _ in root.ids.button_execute.async_bind(
@@ -231,14 +246,29 @@ async def watch_button_closely(app):
 
 def execute_algorithm(app, input_path):
     app.root.ids.label_result.text = 'Creating 3 different teamings...'
-    d_matcher.execute(
-        input_path, epochs=EPOCHS, progressbar=Progressbar, amount_teamings=3)
-    app.root.ids.label_status.set_success(
-        'Successfully created teaming files. '
-        'They can be found in the same directory as the input file.')
-    mac_notify("D-Matcher is done", "Successfully created teaming files. They "
-        "can be found in the same directory as the input file.")
-    app.root.ids.progress_bar.value = 100
+    try:
+        d_matcher.execute(
+            input_path, epochs=EPOCHS, progressbar=Progressbar, amount_teamings=3)
+        app.root.ids.label_status.set_success(
+            'Successfully created teaming files. '
+            'They can be found in the same directory as the input file.')
+        mac_notify("D-Matcher is done", "Successfully created teaming files. They "
+            "can be found in the same directory as the input file.")
+        app.root.ids.progress_bar.value = 100
+    except BaseException as e:
+        if not isinstance(e, KeyboardInterrupt):
+            app.root.show_error(
+                f"An error occurred during execution:\n{repr(e)}\n\n"
+                f"For more information see \n{os.path.abspath('./error.txt')}"
+            )
+            with open('./error.txt', 'w') as file:
+                file.write(f'{repr(e)}: {e.__doc__}\n\n')
+                file.write(traceback.format_exc())
+
 
 if __name__ == '__main__':
-    DMatcherApp().run()
+    try:
+        DMatcherApp().run()
+    except trio.RunFinishedError:
+        # Called when error popup closes the application
+        pass
