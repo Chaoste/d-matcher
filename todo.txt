@@ -27,9 +27,10 @@ CHECK:
 - Enter Taste works
 - Remove key down callback on dismissed popup
 - Kivy: Error Reporting UI
+- describe xslx format
 
 TODO:
-- describe xslx format
+- generate error txt in HOME directory
 
 [optional]
 - Insert intensity

@@ -9,12 +9,12 @@ to a student and the columns are as follows:
 
 < hash > < Sex > < Discipline > < Nationality > < Semester >
 
-* The < hash > field contains a cryptographic hash of the student’s name (for privacy reasons).
-* The sex field contains ‘m’ for male and ‘f’ for female.
-* The Discipline field contains one of the following seven entries:
+- The < hash > field contains a cryptographic hash of the student’s name (for privacy reasons).
+- The sex field contains ‘m’ for male and ‘f’ for female.
+- The Discipline field contains one of the following seven entries:
   ‘Business’, ‘Creative Disciplines’, ‘Engineering’, ‘Humanities’, ‘Life Sciences’, ‘Media’ or ‘Social Sciences’.
-* The Nationality field contains one of 37 nationalities, depending on the selfreported nationality of the student.
-* The Semester field contains the semester in which that student was enrolled. This is stored as a code that indicates the semester and year. For example, the students in Winter 2015 semester have WT-15 (for Winter Term), and the students enrolled in this semester have the code ST-17.
+- The Nationality field contains one of 37 nationalities, depending on the selfreported nationality of the student.
+- The Semester field contains the semester in which that student was enrolled. This is stored as a code that indicates the semester and year. For example, the students in Winter 2015 semester have WT-15 (for Winter Term), and the students enrolled in this semester have the code ST-17.
 
 ### Output
 
@@ -35,4 +35,4 @@ For the fourth teaming the search space doesn't become greater but there are les
 
 ### Release
 
-TODO: https://kivy.org/doc/stable/guide/packaging-osx.html
+For a description of the data see the DATA_FORMAT.md
