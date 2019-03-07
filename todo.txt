@@ -28,11 +28,12 @@ CHECK:
 - Remove key down callback on dismissed popup
 - Kivy: Error Reporting UI
 - describe xslx format
-
-TODO:
 - generate error txt in HOME directory
 
+TODO:
+- Insert intensity (easy, medium, hard)
+
 [optional]
-- Insert intensity
+- Make icon border smoother
 - Merge progressbars in terminal (intern in dmatcher package)
 - Select columns of features (?)

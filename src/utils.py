@@ -62,7 +62,6 @@ def process_semesters(students, target_func, *args, **kwargs):
 
 def store_teaming(teaming, filename=None, show_all=True, xlsx=True):
     if xlsx:
-        print(teaming.columns)
         assert all(teaming.columns[-3:] == ['1st', '2nd', '3rd']), \
             'Only 3 teamings are supported for xlsx export'
         xlsx_utils.export(teaming, filename)
