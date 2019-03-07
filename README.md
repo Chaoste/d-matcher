@@ -2,6 +2,29 @@
 
 Grouping students with a high diversity regarding gender, profession and nationality.
 
+### Install & Build
+
+```
+brew install pkg-config sdl2 sdl2_image sdl2_ttf sdl2_mixer gstreamer
+pip install Cython==0.26.1
+pip install git+https://github.com/matham/kivy.git@async-loop
+pip install -r requirements/extended.mac.build.txt
+```
+
+Make sure pyinstaller is installed. Furthermore see the kivy docs on installings kivy dependencies.
+
+```
+  pyinstaller dmatcher.spec
+  # From kivy docs
+  pushd dist
+  hdiutil create ./Touchtracer.dmg -srcfolder touchtracer.app -ov
+  popd
+```
+
+### Troubleshooting
+
+If matplotlib or pygame is installed, pyinstaller will take the "libpng16.16.dylib" form those modules which currently appear to be deprecated. Since at least version 52 is required, you need to make sure that the lib ist loaded form the PIL module. To check the current used version run `otool -V my/path/libpng16.16.dylib`.
+
 ### Input
 
 The data for this project is real data provided to us by the HPI School of Design Thinking. You are given as input a table stored in CSV format. This table has 80/81 rows and five columns. Each row corresponds

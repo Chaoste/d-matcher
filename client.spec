@@ -19,18 +19,18 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
           [],
+          exclude_binaries=True,
           name='client',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          runtime_tmpdir=None,
-          console=False , icon='res/favicon-v2.ico')
-app = BUNDLE(exe,
-             name='client.app',
-             icon='res/favicon-v2.ico',
-             bundle_identifier=None)
+          console=True )
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               name='client')

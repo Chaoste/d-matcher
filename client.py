@@ -28,6 +28,7 @@ from utils import mac_notify
 
 import src.d_matcher as d_matcher
 
+# easy takes ~3 minutes, medium takes 7 minutes, hard takes >10 minutes
 DIFFICULTIES = {
     'easy': {
         'epochs': 50,
@@ -255,8 +256,8 @@ async def watch_button_closely(app):
 def execute_algorithm(app, input_path):
     app.root.ids.label_result.text = 'Creating 5 different teamings...'
     try:
-        epochs=DIFFICULTIES['medium']['epochs']
-        mutation_intensity=DIFFICULTIES['medium']['mutation_intensity']
+        epochs=DIFFICULTIES['easy']['epochs']
+        mutation_intensity=DIFFICULTIES['easy']['mutation_intensity']
         d_matcher.execute(
             input_path, epochs=epochs, mutation_intensity=mutation_intensity,
             progressbar=Progressbar, amount_teamings=3)

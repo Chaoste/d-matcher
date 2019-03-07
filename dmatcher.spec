@@ -14,7 +14,8 @@ dir = os.getcwd()
 added_files = [
   ( os.path.join(dir, 'dmatcher.kv'), '.' ),
   ( os.path.join(dir, 'res', 'background.jpg'), os.path.join('.', 'res') ),
-  ( os.path.join(dir, 'res', 'favicon.ico'), os.path.join('.', 'res') ),
+  ( os.path.join(dir, 'res', 'favicon-v2.ico'), os.path.join('.', 'res') ),
+  ( os.path.join(dir, 'venv2', 'lib', 'python3.7', 'site-packages', 'PIL', '.dylibs', 'libpng16.16.dylib'), os.path.join('.') ),
 ]
 
 a = Analysis(['client.py'],
@@ -51,5 +52,5 @@ coll = COLLECT(exe,
 
 app = BUNDLE(coll,
              name=f'{app_name}.app',
-             icon=os.path.join(dir, 'res', 'favicon48.icns'),
+             icon=os.path.join(dir, 'res', 'favicon-v2.icns'),
              bundle_identifier=None)
