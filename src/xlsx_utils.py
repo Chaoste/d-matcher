@@ -30,7 +30,7 @@ discipline_font_colors = [
 
 
 def add_teaming_colors(teaming, workbook, worksheet):
-    first_column = 65 + len(teaming.columns) - 2  # A=65
+    first_column = 65 + len(teaming.columns) - 3  # A=65, equals list(teaming.columns).index('1st')
     start = f'{chr(first_column)}2'
     end = f'{chr(first_column+2)}{len(teaming.index)+1}'
     for i, (color, font_color) in enumerate(zip(colors, font_colors)):
@@ -43,7 +43,7 @@ def add_teaming_colors(teaming, workbook, worksheet):
 
 
 def add_discipline_colors(teaming, workbook, worksheet):
-    discipline_column = chr(65 + len(teaming.columns) - 3)
+    discipline_column = chr(65 + list(teaming.columns).index('Field of Study'))
     start = f'{discipline_column}2'
     end = f'{discipline_column}{len(teaming.index)+1}'
     for discipline, color, font_color in zip(disciplines, discipline_colors, discipline_font_colors):
@@ -56,14 +56,7 @@ def add_discipline_colors(teaming, workbook, worksheet):
             'format':   color_format})
 
 
-def export(teaming, filename):
-    # Create a Pandas Excel writer using XlsxWriter as the engine.
-    writer = pd.ExcelWriter(f'{filename}.xlsx', engine='xlsxwriter')
-    teaming.to_excel(writer, sheet_name='Teamings', index=False)
-    workbook = writer.book
-    worksheet = writer.sheets['Teamings']
-    add_teaming_colors(teaming, workbook, worksheet)
-    add_discipline_colors(teaming, workbook, worksheet)
+def add_centering_and_spacing(teaming, workbook, worksheet):
     centered = workbook.add_format()
     centered.set_align('center')
     for idx, col_name in enumerate(teaming):
@@ -72,6 +65,17 @@ def export(teaming, filename):
             len(str(col_name))  # len of column name/header
         )) + 1  # Adding a little extra space
         worksheet.set_column(idx, idx, col_len, centered if col_len < 5 else None)
+
+
+def export(teaming, filename):
+    # Create a Pandas Excel writer using XlsxWriter as the engine.
+    writer = pd.ExcelWriter(f'{filename}.xlsx', engine='xlsxwriter')
+    teaming.to_excel(writer, sheet_name='Teamings', index=False)
+    workbook = writer.book
+    worksheet = writer.sheets['Teamings']
+    add_teaming_colors(teaming, workbook, worksheet)
+    add_discipline_colors(teaming, workbook, worksheet)
+    add_centering_and_spacing(teaming, workbook, worksheet)
     writer.save()
 
 

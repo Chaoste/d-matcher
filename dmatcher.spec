@@ -1,12 +1,13 @@
 # -*- mode: python -*-
 
 import os
+import sys
 
-DEBUG = False
+DEBUG = (os.getenv('DEBUG') or '').lower() == 'true'
 
 block_cipher = None
 
-app_name = 'DMatcher'
+app_name = 'DMatcher-DEBUG' if DEBUG else 'DMatcher'
 
 dir = os.getcwd()
 
@@ -15,7 +16,6 @@ added_files = [
   ( os.path.join(dir, 'dmatcher.kv'), '.' ),
   ( os.path.join(dir, 'res', 'background.jpg'), os.path.join('.', 'res') ),
   ( os.path.join(dir, 'res', 'favicon-v2.ico'), os.path.join('.', 'res') ),
-  ( os.path.join(dir, 'venv2', 'lib', 'python3.7', 'site-packages', 'PIL', '.dylibs', 'libpng16.16.dylib'), os.path.join('.') ),
 ]
 
 a = Analysis(['client.py'],
@@ -54,3 +54,7 @@ app = BUNDLE(coll,
              name=f'{app_name}.app',
              icon=os.path.join(dir, 'res', 'favicon-v2.icns'),
              bundle_identifier=None)
+
+os.system("pushd dist")
+os.system(f"hdiutil create ./dist/{app_name}.dmg -srcfolder ./dist/{app_name}.app -ov")
+os.system("popd")

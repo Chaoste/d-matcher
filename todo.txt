@@ -32,6 +32,7 @@ CHECK:
 
 TODO:
 - Insert intensity (easy, medium, hard)
+- Highlight collisions
 
 [optional]
 - Make icon border smoother

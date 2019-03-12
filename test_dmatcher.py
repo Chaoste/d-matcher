@@ -1,9 +1,9 @@
 from src.d_matcher import execute, get_collisions
 import sys
 
-teaming = execute('~/Sample Student List.xlsx', epochs=2,
+teaming = execute('~/Sample Student List.xlsx', epochs=1,
                   mutation_intensity=100, amount_teamings=3)
-print(len(list(get_collisions(teaming))))
+print('Collisions:', len(list(get_collisions(teaming))))
 sys.exit(0)
 
 

@@ -5,21 +5,17 @@ Grouping students with a high diversity regarding gender, profession and nationa
 ### Install & Build
 
 ```
-brew install pkg-config sdl2 sdl2_image sdl2_ttf sdl2_mixer gstreamer
-pip install Cython==0.26.1
-pip install git+https://github.com/matham/kivy.git@async-loop
-pip install -r requirements/extended.mac.build.txt
+./scripts/install.sh
 ```
 
 Make sure pyinstaller is installed. Furthermore see the kivy docs on installings kivy dependencies.
 
 ```
   pyinstaller dmatcher.spec
-  # From kivy docs
-  pushd dist
-  hdiutil create ./Touchtracer.dmg -srcfolder touchtracer.app -ov
-  popd
+  # DEBUG=True pyinstaller dmatcher.spec
 ```
+
+You can set "DEBUG=True" to show console and debug the process but somehow it is ignored. The console will always be visible if you open the app in the folder while it won't show if you execute the bundled app.
 
 ### Troubleshooting
 
