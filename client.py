@@ -29,7 +29,6 @@ from utils import mac_notify
 import src.d_matcher as d_matcher
 
 # easy takes ~3 minutes, medium 7 minutes, hard >10 minutes
-DEFAULT_DIFFICULTY = 'medium'
 DIFFICULTIES = {
     'debug': {
         'epochs': 1,
@@ -99,9 +98,47 @@ class StatusLabel(Label):
         self.text = text
 
 
+class Progressbar:
+    def __init__(self, _range):
+        self.app = App.get_running_app()
+        self._range = _range
+        self._gen = iter(_range)
+        self.first_value = self.app.root.dmatcher_runs * 20
+        self.last_value = self.first_value + 20
+        self.app.root.ids.progress_bar.value = self.first_value
+
+
+    def __next__(self):
+        try:
+            next_value = next(self._gen)
+            new_progress_value = self.first_value + round(20 * next_value / len(self._range))
+            if self.app.root.ids.progress_bar.value != new_progress_value:
+                self.app.root.ids.progress_bar.value = new_progress_value
+            return next_value
+        except StopIteration:
+            self.app.root.ids.progress_bar.value = self.last_value
+            raise StopIteration
+
+    def __iter__(self):
+        return self
+
+    def set_description(self, text):
+        self.app.root.ids.label_status.set_status(f'Teaming {self.app.root.dmatcher_runs+1}: {text}')
+
+    def set_final_desc(self, text):
+        self.app.root.ids.label_result.set_success(f'Teaming {self.app.root.dmatcher_runs+1}:\n{text}')
+        self.app.root.dmatcher_runs += 1
+
+
+    def refresh(self):
+        # We don't need to force refreshing since kivy will take care of it
+        pass
+
+
 class DMatcher(FloatLayout):
-    loadfile = ObjectProperty(None)
     input_path = ObjectProperty(None)
+    difficulty = ObjectProperty(None)
+    dmatcher_runs = ObjectProperty(0)
 
     def __init__(self, **kwargs):
         super(DMatcher, self).__init__(**kwargs)
@@ -128,6 +165,19 @@ class DMatcher(FloatLayout):
         self.set_input_path(os.path.join(path, filename[0]))
         self.dismiss_popup()
 
+    def on_change_difficulty(self, value):
+        if value == -1:
+            level = 'Short'
+            self.difficulty = 'easy'
+        if value == 0:
+            level = 'Medium'
+            self.difficulty = 'medium'
+        if value == 1:
+            level = 'Long'
+            self.difficulty = 'hard'
+        self.ids.label_difficulty.text = f'Processing Timg: {level}'
+
+
     def dismiss_popup(self):
         self._popup.dismiss()
         Window.unbind(on_key_down=self._popup.content._on_keyboard_down)
@@ -139,13 +189,11 @@ class DMatcher(FloatLayout):
             app.root.ids.label_status.set_error(f'Received invalid file of type {filetype}!')
             return
 
-        app.root.ids.input_file_label.text = f'Selected File:\n{path}'
+        app.root.ids.label_input_file.text = f'Selected File:\n{path}'
         app.root.ids.label_status.set_status(f'Ready to processs selected file.')
         # Set background to default behaviour (initial dark, hovered light)
-        app.root.ids.drop_area.background_normal = app.root.ids.button_execute.background_normal
-        app.root.ids.drop_area.background_color = [0.1, 0.4, 0.1, 1]
-        # app.root.ids.button_execute.background_normal = ''
-        # app.root.ids.button_execute.background_color = [0.1, 0.4, 0.1, 1]
+        app.root.ids.button_input_file.background_normal = app.root.ids.button_execute.background_normal
+        app.root.ids.button_input_file.background_color = [0.1, 0.4, 0.1, 1]
         app.root.ids.button_execute.disabled = False
         self.input_path = path
 
@@ -154,48 +202,10 @@ class DMatcher(FloatLayout):
         thread.start()
 
 
-class Progressbar:
-    def __init__(self, _range):
-        self.app = App.get_running_app()
-        self._range = _range
-        self._gen = iter(_range)
-        self.first_value = self.app.dmatcher_runs * 20
-        self.last_value = self.first_value + 20
-        self.app.root.ids.progress_bar.value = self.first_value
-
-
-    def __next__(self):
-        try:
-            next_value = next(self._gen)
-            new_progress_value = self.first_value + round(20 * next_value / len(self._range))
-            if self.app.root.ids.progress_bar.value != new_progress_value:
-                self.app.root.ids.progress_bar.value = new_progress_value
-            return next_value
-        except StopIteration:
-            self.app.root.ids.progress_bar.value = self.last_value
-            raise StopIteration
-
-    def __iter__(self):
-        return self
-
-    def set_description(self, text):
-        self.app.root.ids.label_status.set_status(f'Teaming {self.app.dmatcher_runs+1}: {text}')
-
-    def set_final_desc(self, text):
-        self.app.root.ids.label_result.text = f'Teaming {self.app.dmatcher_runs+1}:\n{text}'
-        self.app.dmatcher_runs += 1
-
-
-    def refresh(self):
-        # We don't need to force refreshing since kivy will take care of it
-        pass
-
-
 class DMatcherApp(App):
     widgets = DictProperty()
     title = 'D-Matcher'
     icon = 'res/favicon-v2.ico'
-    dmatcher_runs = 0
 
     def __init__(self, **kwargs):
         super(DMatcherApp, self).__init__(**kwargs)
@@ -249,24 +259,30 @@ async def watch_button_closely(app):
     # watch the on_release event of the button and react to every release
     async for _ in root.ids.button_execute.async_bind(
             'on_release', thread_fn=trio.BlockingTrioPortal().run_sync):
+        app.root.ids.slider_difficulty.disabled = True
+        app.root.ids.button_input_file.disabled = True
         app.root.ids.button_execute.disabled = True
         input_path = app.root.input_path
-        app.dmatcher_runs = 0
+        app.root.dmatcher_runs = 0
         execute_algorithm(app, input_path)
+        app.root.ids.slider_difficulty.disabled = False
         app.root.ids.button_execute.disabled = False
-        # await trio_run_in_kivy_thread(
-        #     execute_algorithm, app, input_path)
+        app.root.ids.button_input_file.disabled = False
 
 
 def execute_algorithm(app, input_path):
-    app.root.ids.label_result.text = 'Creating 5 different teamings...'
+    app.root.ids.label_result.set_status('Creating 5 different teamings...')
+    app.root.ids.label_status.set_status('')
     try:
-        epochs=DIFFICULTIES[DEFAULT_DIFFICULTY]['epochs']
-        mutation_intensity=DIFFICULTIES[DEFAULT_DIFFICULTY]['mutation_intensity']
-        d_matcher.execute(
+        epochs=DIFFICULTIES[app.root.difficulty]['epochs']
+        mutation_intensity=DIFFICULTIES[app.root.difficulty]['mutation_intensity']
+        teaming = d_matcher.execute(
             input_path, epochs=epochs, mutation_intensity=mutation_intensity,
             progressbar=Progressbar, amount_teamings=3)
-        app.root.ids.label_status.set_success(
+        n_collisions = len(list(get_collisions(teaming)))
+        app.root.ids.button_execute.text = 'Regenerate Teaming'
+        app.root.ids.label_status.set_success(f'Collisions: {n_collisions}')
+        app.root.ids.label_result.set_success(
             'Successfully created teaming files. '
             'They can be found in the same directory as the input file.')
         mac_notify("D-Matcher is done", "Successfully created teaming files. They "

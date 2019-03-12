@@ -74,7 +74,7 @@
                 size_hint: 1, 0.3
 
             DropFile:
-                id: drop_area
+                id: button_input_file
                 text: 'Drop or select the input file (.csv)'
                 font_size: '16dp'
                 background_normal: ''
@@ -84,13 +84,32 @@
             BoxLayout:
                 size_hint: 1, 1
                 Label:
-                    id: input_file_label
+                    id: label_input_file
                     text: 'No File Selected'
                     text_size: self.width, 200
                     font: 'Calibri Light'
                     font_size: '12dp'
                     halign: 'center'
                     valign: 'middle'
+
+            BoxLayout:
+                size_hint: 1, 1
+                Label:
+                    id: label_difficulty
+                    text: 'Processing Timg: Long'
+                    text_size: self.width, 200
+                    font: 'Calibri Light'
+                    font_size: '12dp'
+                    halign: 'center'
+                    valign: 'middle'
+
+                Slider:
+                    id: slider_difficulty
+                    range: (-1, 1)
+                    value: 1
+                    step: 1
+                    padding: 1
+                    on_value: root.on_change_difficulty(self.value)
 
             BoxLayout:
                 size_hint: 1, 0.8
@@ -100,12 +119,21 @@
                 Button:
                     size_hint: 0.6, 1
                     id: button_execute
-                    text: 'Calculate Teams'
+                    text: 'Generate Teams'
                     disabled: True
                     background_normal: ''
                     background_color: .4, .3, .7, 1
                 BoxLayout:
                     size_hint: 0.2, 1
+
+            StatusLabel:
+                id: label_result
+                text: ''
+                font: 'Calibri Light'
+                font_size: '12dp'
+                color: 1, 1, 1, 1
+                halign: 'center'
+                valign: 'middle'
 
             StatusLabel:
                 id: label_status
@@ -114,15 +142,6 @@
                 font: 'Calibri Light'
                 font_size: '12dp'
                 color: 0.3, 0.7, 0.3, 1
-                halign: 'center'
-                valign: 'middle'
-
-            StatusLabel:
-                id: label_result
-                text: ''
-                font: 'Calibri Light'
-                font_size: '12dp'
-                color: 1, 1, 1, 1
                 halign: 'center'
                 valign: 'middle'
 

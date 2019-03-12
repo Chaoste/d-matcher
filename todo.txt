@@ -29,9 +29,9 @@ CHECK:
 - Kivy: Error Reporting UI
 - describe xslx format
 - generate error txt in HOME directory
+- Insert intensity (easy, medium, hard)
 
 TODO:
-- Insert intensity (easy, medium, hard)
 - Highlight collisions
 
 [optional]
