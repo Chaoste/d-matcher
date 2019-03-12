@@ -67,7 +67,12 @@ def add_centering_and_spacing(teaming, workbook, worksheet):
         worksheet.set_column(idx, idx, col_len, centered if col_len < 5 else None)
 
 
-def export(teaming, filename):
+def add_collisions(workbook, collisions):
+    # TODO: Store in a new worksheet
+    raise 'Not Implemented!'
+
+
+def export(teaming, filename, collisions=None):
     # Create a Pandas Excel writer using XlsxWriter as the engine.
     writer = pd.ExcelWriter(f'{filename}.xlsx', engine='xlsxwriter')
     teaming.to_excel(writer, sheet_name='Teamings', index=False)
@@ -76,6 +81,8 @@ def export(teaming, filename):
     add_teaming_colors(teaming, workbook, worksheet)
     add_discipline_colors(teaming, workbook, worksheet)
     add_centering_and_spacing(teaming, workbook, worksheet)
+    if collisions is not None:
+        add_collisions(collisions, workbook)
     writer.save()
 
 

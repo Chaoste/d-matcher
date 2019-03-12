@@ -54,7 +54,7 @@ def find_teaming(students: pd.DataFrame,
     return teaming
 
 
-def store_output(teamings: List[Teaming], path: str):
+def store_output(teamings: List[Teaming], path: str, collisions: Optional[List]):
     teaming_columns = ['1st', '2nd', '3rd']
     enriched_students = read_input(path)
     if 'hash' not in enriched_students.columns:
@@ -68,10 +68,10 @@ def store_output(teamings: List[Teaming], path: str):
     timestamp = strftime("%Y_%m_%d_%H_%M_%S", gmtime())
     output_path = os.path.join(directory, f'Teamings__{timestamp}')
     enriched_students.drop(columns="hash", inplace=True)
-    utils.store_teaming(enriched_students, output_path)
+    utils.store_teaming(enriched_students, output_path, collisions=collisions)
 
 
-def execute(path: str, amount_teamings = 1, split_after_first_teamings=True, **kwargs):
+def execute(path: str, amount_teamings = 1, split_after_first_teamings=True, store_collisions=True, **kwargs):
     path = os.path.expanduser(path)
     assert path is not None, 'Path of input file may not be None'
     assert 0 < amount_teamings < 4, 'Only 1, 2 or 3 teamings are possible'
@@ -94,7 +94,7 @@ def execute(path: str, amount_teamings = 1, split_after_first_teamings=True, **k
         teamings2.append(find_teaming(students2, **kwargs, previous_teaming=teamings2, is_second_track=True))
         teamings2.append(find_teaming(students2, **kwargs, previous_teaming=teamings2, is_second_track=True))
         teamings = utils.merge_tracks(teamings1, teamings2)
-    store_output(teamings, path)
+    store_output(teamings, path, get_collisions(teamings) if store_collisions else None)
     return teamings
 
 def get_matches(teamings, s1, s2):
@@ -106,7 +106,7 @@ def get_collisions(teamings):
     for s1, s2 in itertools.combinations(sorted(teamings[0].index), 2):
         matches = list(get_matches(teamings, s1, s2))
         if len(matches) > 1:
-            yield f"{s1}, {s2}, {'-'.join(matches)}"
+            yield s1, s2, ', '.join(matches)
 
 if __name__ == '__main__':
     execute('input/students_wt_15.csv', epochs=3, amount_teamings=3)

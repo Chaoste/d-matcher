@@ -60,11 +60,11 @@ def process_semesters(students, target_func, *args, **kwargs):
     return pd.DataFrame(pd.concat(result).copy(), index=range(321))
 
 
-def store_teaming(teaming, filename=None, show_all=True, xlsx=True):
+def store_teaming(teaming, filename=None, show_all=True, xlsx=True, collisions=None):
     if xlsx:
         assert all(teaming.columns[-3:] == ['1st', '2nd', '3rd']), \
             'Only 3 teamings are supported for xlsx export'
-        xlsx_utils.export(teaming, filename)
+        xlsx_utils.export(teaming, filename, collisions)
     else:
         # Use the same format as used for the input data
         # Generates FutureWarning: Passing list-likes to .loc or [] with missing label

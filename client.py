@@ -278,7 +278,7 @@ def execute_algorithm(app, input_path):
         mutation_intensity=DIFFICULTIES[app.root.difficulty]['mutation_intensity']
         teaming = d_matcher.execute(
             input_path, epochs=epochs, mutation_intensity=mutation_intensity,
-            progressbar=Progressbar, amount_teamings=3)
+            progressbar=Progressbar, amount_teamings=3, store_collisions=False)
         n_collisions = len(list(get_collisions(teaming)))
         app.root.ids.button_execute.text = 'Regenerate Teaming'
         app.root.ids.label_status.set_success(f'Collisions: {n_collisions}')

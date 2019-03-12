@@ -33,6 +33,7 @@ CHECK:
 
 TODO:
 - Highlight collisions
+- Restructure Layout
 
 [optional]
 - Make icon border smoother
