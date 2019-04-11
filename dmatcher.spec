@@ -1,13 +1,28 @@
 # -*- mode: python -*-
 
+import os
+import sys
+
+DEBUG = (os.getenv('DEBUG') or '').lower() == 'true'
+
 block_cipher = None
 
+app_name = 'DMatcher-DEBUG' if DEBUG else 'DMatcher'
+
+dir = os.getcwd()
+
+# https://pythonhosted.org/PyInstaller/spec-files.html#adding-data-files
+added_files = [
+  ( os.path.join(dir, 'dmatcher.kv'), '.' ),
+  ( os.path.join(dir, 'res', 'background.jpg'), os.path.join('.', 'res') ),
+  ( os.path.join(dir, 'res', 'favicon-v2.ico'), os.path.join('.', 'res') ),
+]
 
 a = Analysis(['client.py'],
-             pathex=['C:\\Users\\Thomas\\HPI\\d-matcher'],
+             pathex=['/Users/thomas/work/repos/d-matcher'],
              binaries=[],
-             datas=[],
-             hiddenimports=[],
+             datas=added_files,
+             hiddenimports=['src'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -21,16 +36,25 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='dmatcher',
-          debug=False,
+          name=app_name,
+          debug=DEBUG,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True )
+          console=DEBUG )
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
                a.datas,
                strip=False,
                upx=True,
-               name='dmatcher')
+               name=app_name)
+
+app = BUNDLE(coll,
+             name=f'{app_name}.app',
+             icon=os.path.join(dir, 'res', 'favicon-v2.icns'),
+             bundle_identifier=None)
+
+os.system("pushd dist")
+os.system(f"hdiutil create ./dist/{app_name}.dmg -srcfolder ./dist/{app_name}.app -ov")
+os.system("popd")

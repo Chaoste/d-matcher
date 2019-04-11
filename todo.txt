@@ -1,0 +1,41 @@
+CHECK:
+- Keep columns like first name, last name
+- teamings in one file: 1st, 2nd, Partner
+- Export xlsx
+- 16 colors for teams
+- Color code for disciplines
+- Transform from "M/F, First Name, Name, Nationality, Field of Study" to my expected format
+- Create hash codes
+- (Optional) import xlsx (+ Client accepts xlsx)
+- 2nd project: Split up into orange and yellow track after first teaming
+- Benachrichtung wenn fertig
+- Drag & Drop
+- merge progressbar runs
+- Icon
+- Gender neutral (m=male, everything else -> female)
+- 75-85 people -> never less than 4 (-> always assumes 8/16 teams)
+- Mehr Epochs (200 -> 20-30 collisions)
+- m/f großschreibung (intern wird es lowercased)
+- strictly punish collisions
+- Inspect why P is not growing that fast (results are too random - maybe because of the first element in P)
+  -> first random solution is usually not bad to start with (my heuristic is worse)
+  -> P is cleaned up many times due to new better solutions
+- Adapted collision measurement and remove manual tweak
+- DMatcher: Error Reporting
+- Recognize ~ as HOME path
+- Spacing & Centering of columns
+- Enter Taste works
+- Remove key down callback on dismissed popup
+- Kivy: Error Reporting UI
+- describe xslx format
+- generate error txt in HOME directory
+- Insert intensity (easy, medium, hard)
+
+TODO:
+- Highlight collisions
+- Restructure Layout
+
+[optional]
+- Make icon border smoother
+- Merge progressbars in terminal (intern in dmatcher package)
+- Select columns of features (?)
