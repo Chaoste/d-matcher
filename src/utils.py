@@ -6,6 +6,7 @@ import hashlib
 
 import src.metrics as metrics
 import src.xlsx_utils as xlsx_utils
+from src.xlsx_utils import REQUIRED_COLUMNS
 
 # --------------------------------------------------------------------------- #
 # Helper
@@ -75,3 +76,8 @@ def store_teaming(teaming, filename=None, show_all=True, xlsx=True, collisions=N
 # Get power of 2 which is closest to num
 def get_closest_power(num):
     return 2 ** round(math.log(num, 2))
+
+def ensure_correct_shape(df):
+    missing = [str(col) for col in REQUIRED_COLUMNS if col not in df.columns]
+    if len(missing) > 0:
+        raise ValueError(f'The worksheet lacks the following columns: {", ".join(missing)}')

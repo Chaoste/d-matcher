@@ -96,7 +96,7 @@
                 size_hint: 1, 1
                 Label:
                     id: label_difficulty
-                    text: 'Processing Timg: Long'
+                    text: 'Processing Timg: Medium'
                     text_size: self.width, 200
                     font: 'Calibri Light'
                     font_size: '12dp'
@@ -106,7 +106,7 @@
                 Slider:
                     id: slider_difficulty
                     range: (-1, 1)
-                    value: 1
+                    value: 0
                     step: 1
                     padding: 1
                     on_value: root.on_change_difficulty(self.value)

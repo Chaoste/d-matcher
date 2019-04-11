@@ -32,6 +32,7 @@ def read_input(path: str) -> pd.DataFrame:
 
 def read_and_transform_input(path: str) -> pd.DataFrame:
     students = read_input(path)
+    utils.ensure_correct_shape(students)
     students = utils.transform_to_old_format(students)
     return students[['hash', 'Sex', 'Discipline', 'Nationality']]
 
@@ -71,7 +72,7 @@ def store_output(teamings: List[Teaming], path: str, collisions: Optional[List])
     utils.store_teaming(enriched_students, output_path, collisions=collisions)
 
 
-def execute(path: str, amount_teamings = 1, split_after_first_teamings=True, store_collisions=True, **kwargs):
+def execute(path: str, amount_teamings = 3, split_after_first_teamings=True, store_collisions=True, **kwargs):
     path = os.path.expanduser(path)
     assert path is not None, 'Path of input file may not be None'
     assert 0 < amount_teamings < 4, 'Only 1, 2 or 3 teamings are possible'

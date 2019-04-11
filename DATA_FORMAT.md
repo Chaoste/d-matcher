@@ -4,6 +4,8 @@ The application accepts files with the csv or xlsx extension. It might be possib
 
 #### Required columns
 
+- 'First Name'
+- 'Name'
 - 'M/F' (or 'Sex')
   - 'm'/'M' is interpreted as male while everything else is internally treated as female
 - 'Discipline' (or 'Field of Study')

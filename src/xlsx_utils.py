@@ -1,6 +1,8 @@
 import openpyxl
 import pandas as pd
 
+REQUIRED_COLUMNS = ['First Name', 'Name', 'M/F', 'Field of Study', 'Nationality']
+
 teaming_columns = ['1st', '2nd', 'Partner']
 
 # Source: https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors/
@@ -67,9 +69,11 @@ def add_centering_and_spacing(teaming, workbook, worksheet):
         worksheet.set_column(idx, idx, col_len, centered if col_len < 5 else None)
 
 
-def add_collisions(workbook, collisions):
-    # TODO: Store in a new worksheet
-    raise 'Not Implemented!'
+def add_collisions(collisions, writer, workbook):
+    writer.createWorkSheet('Collisions')
+    collisions = pd.DataFrame(collisions, columns=['Student', 'Student', 'Teams'])
+    collisions.to_excel(writer, sheet_name='Collisions', index=False)
+    worksheet = writer.sheets['Teamings']
 
 
 def export(teaming, filename, collisions=None):
@@ -81,8 +85,8 @@ def export(teaming, filename, collisions=None):
     add_teaming_colors(teaming, workbook, worksheet)
     add_discipline_colors(teaming, workbook, worksheet)
     add_centering_and_spacing(teaming, workbook, worksheet)
-    if collisions is not None:
-        add_collisions(collisions, workbook)
+    # if collisions is not None:
+    #     add_collisions(collisions, writer, workbook)
     writer.save()
 
 
@@ -90,7 +94,13 @@ def remove_hidden_columns(df, file):
     wb = openpyxl.load_workbook(file)
     ws = wb.worksheets[0]
     visible_columns = []
-    for i, (_, col_dim) in enumerate(ws.column_dimensions.items()):
-        if col_dim.hidden != True:
+    for i, name in enumerate(df.columns):
+        # If a hidden column is required, we ignore the visibility
+        if name in REQUIRED_COLUMNS:
+            visible_columns.append(i)
+        # In some cases, the column dimensions appear to be missing
+        if i not in ws.column_dimensions:
+            continue
+        if ws.column_dimensions[i].hidden != True:
             visible_columns.append(i)
     return df[df.columns[visible_columns]]

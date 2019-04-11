@@ -1,7 +1,10 @@
 from src.d_matcher import execute, get_collisions
 import sys
 
-teaming = execute('~/Sample Student List.xlsx', epochs=1,
+# file = '~/Sample Student List.xlsx'
+# file = '~/Downloads/BT_ST 2019_Participants_ALL_Test.xlsx'
+file = '~/Downloads/BT_ST 2019_Participants_ALL_Test_2.xlsx'
+teaming = execute(file, epochs=1,
                   mutation_intensity=100, amount_teamings=3)
 print('Collisions:', len(list(get_collisions(teaming))))
 sys.exit(0)

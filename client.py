@@ -137,7 +137,7 @@ class Progressbar:
 
 class DMatcher(FloatLayout):
     input_path = ObjectProperty(None)
-    difficulty = ObjectProperty(None)
+    difficulty = ObjectProperty('medium')
     dmatcher_runs = ObjectProperty(0)
 
     def __init__(self, **kwargs):
