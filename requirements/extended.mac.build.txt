@@ -21,7 +21,7 @@ pandas==0.23.4
 pefile==2018.8.8
 Pillow==5.4.1
 pyenchant==2.0.0
-Pygments==2.2.0
+Pygments==2.7.4
 PyInstaller==3.4
 pyobjc==5.1
 pyobjc-core==5.1
