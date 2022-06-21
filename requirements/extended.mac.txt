@@ -10,7 +10,7 @@ Kivy==1.10.1.dev0
 Kivy-Garden==0.1.4
 kiwisolver==1.0.1
 matplotlib==3.0.0
-numpy==1.15.2
+numpy==1.22.0
 outcome==1.0.0
 pandas==0.23.4
 Pygments==2.3.1

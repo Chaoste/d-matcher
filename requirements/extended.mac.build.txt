@@ -14,7 +14,7 @@ jdcal==1.4
 Kivy-Garden==0.1.4
 kiwisolver==1.0.1
 macholib==1.11
-numpy==1.15.1
+numpy==1.22.0
 openpyxl==2.6.1
 outcome==1.0.0
 pandas==0.23.4
